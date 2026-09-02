@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Booking Pivot View (Analytics) -->
+
+    <record id="view_beauty_booking_pivot" model="ir.ui.view">
+        <field name="name">beauty.booking.pivot</field>
+        <field name="model">beauty.booking</field>
+        <field name="arch" type="xml">
+
+            <pivot string="Bookings Analytics">
+                <field name="professional_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="price" type="measure"/>
+            </pivot>
+
+        </field>
+    </record>
+
+
+    <!-- Booking Graph View -->
+
+    <record id="view_beauty_booking_graph" model="ir.ui.view">
+        <field name="name">beauty.booking.graph</field>
+        <field name="model">beauty.booking</field>
+        <field name="arch" type="xml">
+
+            <graph string="Booking Statistics" type="bar">
+                <field name="professional_id" type="row"/>
+                <field name="price" type="measure"/>
+            </graph>
+
+        </field>
+    </record>
+
+
+    <!-- Revenue by Professional Graph -->
+
+    <record id="view_beauty_booking_revenue_graph" model="ir.ui.view">
+        <field name="name">beauty.booking.revenue.graph</field>
+        <field name="model">beauty.booking</field>
+        <field name="arch" type="xml">
+
+            <graph string="Revenue by Professional" type="bar">
+                <field name="professional_id" type="row"/>
+                <field name="price" type="measure"/>
+            </graph>
+
+        </field>
+    </record>
+
+
+    <!-- Bookings by Status Graph -->
+
+    <record id="view_beauty_booking_status_graph" model="ir.ui.view">
+        <field name="name">beauty.booking.status.graph</field>
+        <field name="model">beauty.booking</field>
+        <field name="arch" type="xml">
+
+            <graph string="Bookings by Status" type="pie">
+                <field name="state" type="row"/>
+                <field name="price" type="measure"/>
+            </graph>
+
+        </field>
+    </record>
+
+</odoo>

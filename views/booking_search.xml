@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Booking Filters and Search -->
+
+    <record id="view_beauty_booking_search" model="ir.ui.view">
+        <field name="name">beauty.booking.search</field>
+        <field name="model">beauty.booking</field>
+        <field name="arch" type="xml">
+
+            <search>
+
+                <field name="name"/>
+                <field name="customer_name"/>
+                <field name="professional_id"/>
+                <field name="service_id"/>
+                <field name="appointment_date"/>
+
+                <filter
+                    name="draft"
+                    string="Draft"
+                    domain="[('state', '=', 'draft')]"
+                />
+
+                <filter
+                    name="confirmed"
+                    string="Confirmed"
+                    domain="[('state', '=', 'confirmed')]"
+                />
+
+                <filter
+                    name="completed"
+                    string="Completed"
+                    domain="[('state', '=', 'completed')]"
+                />
+
+                <filter
+                    name="cancelled"
+                    string="Cancelled"
+                    domain="[('state', '=', 'cancelled')]"
+                />
+
+                <filter
+                    name="no_show"
+                    string="No Show"
+                    domain="[('state', '=', 'no_show')]"
+                />
+
+                <separator/>
+
+                <filter
+                    name="today"
+                    string="Today"
+                    domain="[('appointment_date', '>=', context_today().strftime('%Y-%m-%d')),
+                             ('appointment_date', '&lt;', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d'))]"
+                />
+
+                <filter
+                    name="this_week"
+                    string="This Week"
+                    domain="[('appointment_date', '>=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                             ('appointment_date', '&lt;', (context_today() + relativedelta(days=7-context_today().weekday())).strftime('%Y-%m-%d'))]"
+                />
+
+                <filter
+                    name="upcoming"
+                    string="Upcoming (7 days)"
+                    domain="[('appointment_date', '>=', context_today().strftime('%Y-%m-%d')),
+                             ('appointment_date', '&lt;', (context_today() + relativedelta(days=7)).strftime('%Y-%m-%d')),
+                             ('state', 'in', ('draft', 'confirmed'))]"
+                />
+
+                <separator/>
+
+                <group expand="0" string="Group By">
+                    <filter
+                        name="group_by_professional"
+                        string="Professional"
+                        context="{'group_by': 'professional_id'}"
+                    />
+
+                    <filter
+                        name="group_by_service"
+                        string="Service"
+                        context="{'group_by': 'service_id'}"
+                    />
+
+                    <filter
+                        name="group_by_state"
+                        string="Status"
+                        context="{'group_by': 'state'}"
+                    />
+
+                    <filter
+                        name="group_by_date"
+                        string="Appointment Date"
+                        context="{'group_by': 'appointment_date:day'}"
+                    />
+                </group>
+
+            </search>
+
+        </field>
+    </record>
+
+</odoo>

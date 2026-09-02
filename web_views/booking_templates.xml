@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="booking_page" name="Beauty Booking Page">
+        <html>
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <title>Book with <t t-esc="professional.name"/></title>
+                <link rel="stylesheet" href="/web/static/lib/bootstrap/css/bootstrap.css"/>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+                <style>
+                    body {
+                        background: linear-gradient(135deg, #fdf2eb 0%, #f6f0ff 100%);
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        min-height: 100vh;
+                    }
+                    .booking-container {
+                        padding: 40px 20px;
+                    }
+                    .booking-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 2fr;
+                        gap: 28px;
+                        align-items: start;
+                    }
+                    @media (max-width: 768px) {
+                        .booking-grid {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                    .pro-card {
+                        background: #fff;
+                        border-radius: 20px;
+                        padding: 28px;
+                        box-shadow: 0 16px 40px rgba(31, 41, 55, 0.08);
+                        border: 1px solid rgba(17, 24, 39, 0.05);
+                        text-align: center;
+                        position: sticky;
+                        top: 20px;
+                    }
+                    .pro-avatar {
+                        width: 100px;
+                        height: 100px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #111827 0%, #7c3aed 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 16px;
+                        color: #fff;
+                        font-size: 2.5rem;
+                    }
+                    .pro-name {
+                        font-size: 1.4rem;
+                        font-weight: 700;
+                        color: #1f2937;
+                        margin-bottom: 8px;
+                    }
+                    .pro-location {
+                        font-size: 0.9rem;
+                        color: #6b7280;
+                        margin-bottom: 20px;
+                    }
+                    .pro-divider {
+                        height: 2px;
+                        background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+                        margin: 20px 0;
+                    }
+                    .pro-services {
+                        text-align: left;
+                        margin-top: 20px;
+                    }
+                    .service-item {
+                        font-size: 0.85rem;
+                        padding: 8px 0;
+                        color: #4b5563;
+                        border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+                    }
+                    .booking-form {
+                        background: #fff;
+                        border-radius: 20px;
+                        padding: 28px;
+                        box-shadow: 0 16px 40px rgba(31, 41, 55, 0.08);
+                        border: 1px solid rgba(17, 24, 39, 0.05);
+                    }
+                    .form-section {
+                        margin-bottom: 28px;
+                    }
+                    .form-section:last-child {
+                        margin-bottom: 0;
+                    }
+                    .section-title {
+                        font-size: 0.85rem;
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        font-weight: 700;
+                        color: #9ca3af;
+                        margin-bottom: 16px;
+                        display: flex;
+                        align-items: center;
+                    }
+                    .section-title i {
+                        margin-right: 8px;
+                        color: #7c3aed;
+                    }
+                    .booking-label {
+                        font-size: 0.8rem;
+                        text-transform: uppercase;
+                        letter-spacing: 0.06em;
+                        font-weight: 600;
+                        color: #6b7280;
+                        margin-bottom: 8px;
+                        display: block;
+                    }
+                    .form-control, .form-select {
+                        border-radius: 12px;
+                        border: 1.5px solid #e5e7eb;
+                        padding: 11px 14px;
+                        background: #f9fafb;
+                        font-size: 0.95rem;
+                        transition: all 0.25s ease;
+                    }
+                    .form-control:hover, .form-select:hover {
+                        border-color: #d1d5db;
+                    }
+                    .form-control:focus, .form-select:focus {
+                        border-color: #c084fc;
+                        box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.1);
+                        background: #fff;
+                    }
+                    textarea.form-control {
+                        resize: vertical;
+                        min-height: 100px;
+                    }
+                    .form-row {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 14px;
+                    }
+                    .btn-book {
+                        background: linear-gradient(135deg, #111827 0%, #7c3aed 100%);
+                        border: none;
+                        border-radius: 999px;
+                        padding: 14px 32px;
+                        font-weight: 600;
+                        color: #fff;
+                        font-size: 1rem;
+                        box-shadow: 0 12px 28px rgba(124, 58, 237, 0.32);
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        width: 100%;
+                    }
+                    .btn-book:hover {
+                        opacity: 0.94;
+                        box-shadow: 0 14px 36px rgba(124, 58, 237, 0.4);
+                        transform: translateY(-2px);
+                    }
+                    .btn-book:active {
+                        transform: translateY(0);
+                    }
+                    .alert-box {
+                        border-radius: 14px;
+                        border: none;
+                        padding: 16px 20px;
+                        margin-bottom: 24px;
+                        font-size: 0.95rem;
+                    }
+                    .alert-success {
+                        background: rgba(34, 197, 94, 0.08);
+                        color: #166534;
+                        border-left: 4px solid #22c55e;
+                    }
+                    .alert-danger {
+                        background: rgba(239, 68, 68, 0.08);
+                        color: #7f1d1d;
+                        border-left: 4px solid #ef4444;
+                    }
+                </style>
+            </head>
+            <body>
+                <main class="booking-container">
+                    <div class="booking-grid" style="max-width: 1000px; margin: 0 auto;">
+                        <!-- Professional Info Card (Sidebar) -->
+                        <div class="pro-card">
+                            <div class="pro-avatar">
+                                <i class="fas fa-scissors"/>
+                            </div>
+                            <div class="pro-name"><t t-esc="professional.name"/></div>
+                            <t t-if="professional.location">
+                                <div class="pro-location">
+                                    <i class="fas fa-map-marker-alt" style="margin-right: 6px;"/><t t-esc="professional.location"/>
+                                </div>
+                            </t>
+                            <t t-if="professional.bio">
+                                <p style="font-size: 0.9rem; color: #6b7280; margin: 12px 0; line-height: 1.5;">
+                                    <t t-esc="professional.bio"/>
+                                </p>
+                            </t>
+                            <t t-if="professional.service_ids">
+                                <div class="pro-divider"/>
+                                <div class="pro-services">
+                                    <div style="font-size: 0.8rem; font-weight: 700; color: #4b5563; margin-bottom: 12px;">Available Services</div>
+                                    <t t-foreach="professional.service_ids" t-as="svc">
+                                        <div class="service-item">
+                                            <strong><t t-esc="svc.name"/></strong>
+                                            <br/>
+                                            <span style="font-size: 0.75rem; color: #9ca3af;"><t t-esc="svc.duration"/> min • $<t t-esc="'{:.2f}'.format(svc.price)"/></span>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- Booking Form -->
+                        <div class="booking-form">
+                            <div t-if="submitted" class="alert-box alert-success" role="status">
+                                <i class="fas fa-check-circle" style="margin-right: 10px;"/>
+                                Your booking request has been received. The professional will confirm it shortly.
+                            </div>
+                            <div t-if="error" class="alert-box alert-danger" role="alert">
+                                <i class="fas fa-exclamation-circle" style="margin-right: 10px;"/>
+                                <t t-esc="error"/>
+                            </div>
+
+                            <form t-if="not submitted" method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                <!-- Service Selection -->
+                                <div class="form-section">
+                                    <div class="section-title">
+                                        <i class="fas fa-brush"/>Service Selection
+                                    </div>
+                                    <label class="booking-label" for="service_id">Choose a service</label>
+                                    <select id="service_id" name="service_id" class="form-select" required="required">
+                                        <option value="">-- Select a service --</option>
+                                        <option t-foreach="services" t-as="service"
+                                                t-att-value="service.id"
+                                                t-att-selected="'selected' if str(service.id) == post.get('service_id') else None">
+                                            <t t-esc="service.name"/> • <t t-esc="service.duration"/> min • $<t t-esc="'{:.2f}'.format(service.price)"/>
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Date &amp; Time -->
+                                <div class="form-section">
+                                    <div class="section-title">
+                                        <i class="fas fa-calendar-alt"/>Date &amp; Time
+                                    </div>
+                                    <label class="booking-label" for="appointment_date">Select your preferred date and time</label>
+                                    <input id="appointment_date" name="appointment_date" type="datetime-local"
+                                           class="form-control" required="required"
+                                           t-att-min="today"
+                                           t-att-value="post.get('appointment_date', '')"/>
+                                </div>
+
+                                <!-- Your Details -->
+                                <div class="form-section">
+                                    <div class="section-title">
+                                        <i class="fas fa-user"/>Your Details
+                                    </div>
+                                    <div class="form-row">
+                                        <div>
+                                            <label class="booking-label" for="customer_name">Full Name</label>
+                                            <input id="customer_name" name="customer_name" class="form-control"
+                                                   required="required" t-att-value="post.get('customer_name', '')"
+                                                   placeholder="John Doe"/>
+                                        </div>
+                                        <div>
+                                            <label class="booking-label" for="customer_phone">Phone Number</label>
+                                            <input id="customer_phone" name="customer_phone" class="form-control"
+                                                   required="required" t-att-value="post.get('customer_phone', '')"
+                                                   placeholder="(123) 456-7890"/>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 14px;">
+                                        <label class="booking-label" for="customer_email">Email Address</label>
+                                        <input id="customer_email" name="customer_email" type="email" class="form-control"
+                                               t-att-value="post.get('customer_email', '')"
+                                               placeholder="your.email@example.com"/>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Notes -->
+                                <div class="form-section">
+                                    <div class="section-title">
+                                        <i class="fas fa-sticky-note"/>Additional Notes
+                                    </div>
+                                    <label class="booking-label" for="notes">Any special requests or details?</label>
+                                    <textarea id="notes" name="notes" class="form-control"
+                                              placeholder="Tell us if you have any preferences or concerns..."><t t-esc="post.get('notes', '')"/></textarea>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn btn-book">
+                                    <i class="fas fa-calendar-check" style="margin-right: 8px;"/>Request Booking
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </main>
+            </body>
+        </html>
+    </template>
+</odoo>

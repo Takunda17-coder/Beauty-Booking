@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_beauty_professional_tree" model="ir.ui.view">
+        <field name="name">beauty.professional.tree</field>
+        <field name="model">beauty.professional</field>
+        <field name="arch" type="xml">
+
+            <tree>
+                <field name="name"/>
+                <field name="professional_type"/>
+                <field name="username"/>
+                <field name="booking_url" widget="url"/>
+                <field name="phone"/>
+                <field name="location"/>
+                <field name="verified"/>
+                <field name="active"/>
+            </tree>
+
+        </field>
+    </record>
+
+    <record id="view_beauty_professional_form" model="ir.ui.view">
+        <field name="name">beauty.professional.form</field>
+        <field name="model">beauty.professional</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_open_booking_page" string="Open Booking Page"
+                            type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="professional_type"/>
+                            <field name="user_id"/>
+                            <field name="username"/>
+                            <field name="booking_url" widget="url" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="email"/>
+                            <field name="location"/>
+                            <field name="verified"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Profile">
+                            <field name="bio"/>
+                            <field name="profile_image" widget="image"/>
+                        </page>
+                        <page string="Services">
+                            <field name="service_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="description"/>
+                                    <field name="price"/>
+                                    <field name="duration"/>
+                                    <field name="active"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

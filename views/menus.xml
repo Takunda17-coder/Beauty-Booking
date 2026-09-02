@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_beauty_professional" model="ir.actions.act_window">
+        <field name="name">Professionals</field>
+        <field name="res_model">beauty.professional</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_beauty_service" model="ir.actions.act_window">
+        <field name="name">Services</field>
+        <field name="res_model">beauty.service</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_beauty_booking" model="ir.actions.act_window">
+        <field name="name">Bookings</field>
+        <field name="res_model">beauty.booking</field>
+        <field name="view_mode">tree,form,calendar,pivot,graph</field>
+        <field name="context">{'search_default_confirmed': 1}</field>
+    </record>
+
+    <!-- Main Application Menu -->
+    <menuitem
+        id="menu_beauty_root"
+        name="Beauty Booking"
+        sequence="10"
+        web_icon="beauty_booking,static/description/icon.png"
+    />
+
+
+    <!-- Bookings -->
+    <menuitem
+        id="menu_beauty_bookings"
+        name="Bookings"
+        parent="menu_beauty_root"
+        action="action_beauty_booking"
+        sequence="5"
+    />
+
+    <!-- Professionals -->
+    <menuitem
+        id="menu_beauty_professionals"
+        name="Professionals"
+        parent="menu_beauty_root"
+        action="action_beauty_professional"
+        sequence="10"
+    />
+
+
+    <!-- Services -->
+    <menuitem
+        id="menu_beauty_services"
+        name="Services"
+        parent="menu_beauty_root"
+        action="action_beauty_service"
+        sequence="20"
+    />
+
+</odoo>

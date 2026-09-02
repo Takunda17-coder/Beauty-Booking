@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Booking List -->
+
+    <record id="view_beauty_booking_tree" model="ir.ui.view">
+        <field name="name">beauty.booking.tree</field>
+        <field name="model">beauty.booking</field>
+        <field name="arch" type="xml">
+
+            <tree>
+                <field name="name"/>
+                <field name="customer_name"/>
+                <field name="customer_phone"/>
+                <field name="professional_id"/>
+                <field name="service_id"/>
+                <field name="appointment_date"/>
+                <field name="price"/>
+                <field name="state"
+                widget="statusbar"
+                statusbar_visible="draft,confirmed,completed,no_show,cancelled"/>
+            </tree>
+
+        </field>
+    </record>
+
+
+    <!-- Booking Form -->
+
+    <record id="view_beauty_booking_form" model="ir.ui.view">
+        <field name="name">beauty.booking.form</field>
+        <field name="model">beauty.booking</field>
+        <field name="arch" type="xml">
+
+            <form>
+
+                <header>
+
+                    <button
+                        name="action_confirm"
+                        string="Confirm"
+                        type="object"
+                        class="oe_highlight"
+                        attrs="{'invisible': [('state', '!=', 'draft')]}"
+                    />
+
+                    <button
+                        name="action_complete"
+                        string="Complete"
+                        type="object"
+                        attrs="{'invisible': [('state', '!=', 'confirmed')]}"
+                    />
+
+                    <button
+                        name="action_cancel"
+                        string="Cancel"
+                        type="object"
+                        attrs="{'invisible': [('state', 'in', ('completed', 'cancelled', 'no_show'))]}"
+                    />
+
+                    <button
+                        name="action_no_show"
+                        string="No Show"
+                        type="object"
+                        attrs="{'invisible': [('state', '!=', 'confirmed')]}"
+                    />
+
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="draft,confirmed,completed"
+                    />
+
+                </header>
+
+                <sheet>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <group>
+
+                        <group string="Customer">
+                            <field name="customer_name"/>
+                            <field name="customer_phone"/>
+                            <field name="customer_email"/>
+                        </group>
+
+                        <group string="Appointment">
+                            <field name="professional_id"/>
+                            <field name="service_id"/>
+                            <field name="appointment_date"/>
+                        </group>
+
+                    </group>
+
+                    <group string="Service Information">
+
+                        <group>
+                            <field name="duration"/>
+                            <field name="price"/>
+                        </group>
+
+                    </group>
+
+                    <notebook>
+
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+
+            </form>
+
+        </field>
+    </record>
+
+
+    <!-- Booking Calendar View -->
+
+    <record id="view_beauty_booking_calendar" model="ir.ui.view">
+        <field name="name">beauty.booking.calendar</field>
+        <field name="model">beauty.booking</field>
+        <field name="arch" type="xml">
+
+            <calendar
+                string="Bookings"
+                date_start="appointment_date"
+                date_delay="duration"
+                color="professional_id"
+                >
+                <field name="professional_id"/>
+                <field name="service_id"/>
+                <field name="customer_name"/>
+                <field name="duration"/>
+                <field name="price"/>
+                <field name="state"/>
+            </calendar>
+
+        </field>
+    </record>
+
+</odoo>
+

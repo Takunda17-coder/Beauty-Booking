@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_beauty_professional_user,beauty.professional.user,model_beauty_professional,beauty_booking.group_beauty_user,1,1,1,0
+access_beauty_professional_manager,beauty.professional.manager,model_beauty_professional,beauty_booking.group_beauty_manager,1,1,1,1
+access_beauty_service_user,beauty.service.user,model_beauty_service,beauty_booking.group_beauty_user,1,1,1,0
+access_beauty_service_manager,beauty.service.manager,model_beauty_service,beauty_booking.group_beauty_manager,1,1,1,1
+access_beauty_booking_user,beauty.booking.user,model_beauty_booking,beauty_booking.group_beauty_user,1,1,1,0
+access_beauty_booking_manager,beauty.booking.manager,model_beauty_booking,beauty_booking.group_beauty_manager,1,1,1,1
+access_beauty_availability_user,beauty.availability.user,model_beauty_availability,beauty_booking.group_beauty_user,1,1,1,0
+access_beauty_availability_manager,beauty.availability.manager,model_beauty_availability,beauty_booking.group_beauty_manager,1,1,1,1

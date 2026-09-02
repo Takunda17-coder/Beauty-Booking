@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Dashboard Template -->
+        <template id="portal_dashboard" name="Professional Dashboard">
+            <t t-call="website.layout">
+                <style>
+                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
+                    .portal-wrap { padding: 28px 0 40px; }
+                    .portal-hero { background: linear-gradient(135deg, #1f2937 0%, #7c3aed 100%); border-radius: 24px; padding: 28px 24px; color: #fff; box-shadow: 0 18px 40px rgba(124,58,237,0.18); }
+                    .portal-card { background: #fff; border: 1px solid rgba(15,23,42,0.06); border-radius: 18px; box-shadow: 0 10px 24px rgba(15,23,42,0.05); }
+                    .portal-card .card-body { padding: 1.2rem; }
+                    .stat-number { font-size: 2rem; font-weight: 700; color: #1f2937; }
+                    .action-btn { border-radius: 14px; padding: 0.9rem 1rem; font-weight: 600; }
+                    .table thead th { background: #f8fafc; color: #475569; }
+                </style>
+                <div class="container portal-wrap">
+                    <div class="portal-hero mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <h1 class="mb-1" style="color: #fff;">Welcome, <t t-esc="professional.name"/></h1>
+                                <p class="mb-0 text-white-50">Professional Portal</p>
+                            </div>
+                            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                                <a href="/beauty/profile" class="btn btn-light text-dark action-btn">
+                                    <i class="fa fa-user"/> Edit Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h1>Welcome, <t t-esc="professional.name"/></h1>
+                            <p class="text-muted">Professional Portal</p>
+                        </div>
+                        <div class="col-lg-4 text-end">
+                            <a href="/beauty/profile" class="btn btn-primary">
+                                <i class="fa fa-user"/> Edit Profile
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card portal-card">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">Total Bookings</h5>
+                                    <p class="card-text stat-number"><t t-esc="total_bookings"/></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card portal-card">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">Completed</h5>
+                                    <p class="card-text stat-number"><t t-esc="completed_bookings"/></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card portal-card">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">Services</h5>
+                                    <p class="card-text stat-number"><t t-esc="len(professional.service_ids)"/></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card portal-card">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">Verified</h5>
+                                    <p class="card-text">
+                                        <span t-if="professional.verified" class="badge bg-success">Yes</span>
+                                        <span t-else="" class="badge bg-secondary">No</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Bookings -->
+                    <div class="card portal-card mt-4">
+                        <div class="card-header bg-white border-0 pt-3 px-3">
+                            <h5 class="mb-0">Today's Bookings</h5>
+                        </div>
+                        <div class="card-body">
+                            <t t-if="today_bookings">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Customer</th>
+                                            <th>Service</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="today_bookings" t-as="booking">
+                                            <td><t t-esc="booking.appointment_date.strftime('%H:%M')"/></td>
+                                            <td><t t-esc="booking.customer_name"/></td>
+                                            <td><t t-esc="booking.service_id.name"/></td>
+                                            <td>
+                                                <span t-if="booking.state == 'draft'" class="badge bg-warning">Draft</span>
+                                                <span t-elif="booking.state == 'confirmed'" class="badge bg-info">Confirmed</span>
+                                                <span t-elif="booking.state == 'completed'" class="badge bg-success">Completed</span>
+                                                <span t-elif="booking.state == 'cancelled'" class="badge bg-danger">Cancelled</span>
+                                            </td>
+                                            <td>
+                                                <a t-href="'/beauty/bookings'" class="btn btn-sm btn-outline-primary">View</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <p class="text-muted">No bookings for today.</p>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card portal-card mt-4">
+                        <div class="card-header bg-white border-0 pt-3 px-3">
+                            <h5 class="mb-0">Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <a href="/beauty/bookings" class="btn btn-outline-primary w-100 action-btn">
+                                        <i class="fa fa-calendar"/> Manage Bookings
+                                    </a>
+                                </div>
+                                <div class="col-md-4">
+                                    <a href="/beauty/availability" class="btn btn-outline-primary w-100 action-btn">
+                                        <i class="fa fa-clock"/> Working Hours
+                                    </a>
+                                </div>
+                                <div class="col-md-4">
+                                    <a href="/beauty/profile" class="btn btn-outline-primary w-100 action-btn">
+                                        <i class="fa fa-user"/> My Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!-- Profile Edit Template -->
+        <template id="portal_profile" name="Professional Profile">
+            <t t-call="website.layout">
+                <style>
+                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
+                    .portal-page { padding: 28px 0 40px; }
+                    .portal-header { background: linear-gradient(135deg, #1f2937 0%, #7c3aed 100%); border-radius: 24px; padding: 24px 22px; color: #fff; box-shadow: 0 18px 40px rgba(124,58,237,0.18); }
+                    .portal-card { background: #fff; border-radius: 18px; border: 1px solid rgba(15,23,42,0.06); box-shadow: 0 14px 30px rgba(15,23,42,0.06); }
+                    .portal-card .card-body { padding: 1.5rem; }
+                    .form-control, .form-select, textarea { border-radius: 14px; border: 1px solid #e5e7eb; padding: 0.8rem 1rem; background: #f9fafb; }
+                    .form-control:focus, .form-select:focus, textarea:focus { border-color: #c084fc; box-shadow: 0 0 0 0.2rem rgba(192, 132, 252, 0.15); background: #fff; }
+                    .btn-portal-primary { background: linear-gradient(135deg, #111827 0%, #7c3aed 100%); border: none; border-radius: 999px; padding: 0.75rem 1.4rem; color: #fff; font-weight: 600; }
+                    .btn-portal-secondary { border-radius: 999px; padding: 0.75rem 1.4rem; font-weight: 600; }
+                    .table thead th { background: #f8fafc; color: #475569; }
+                </style>
+                <div class="container portal-page">
+                    <div class="portal-header mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <h1 class="mb-1" style="color: #fff;">Edit Profile</h1>
+                                <p class="mb-0 text-white-50">Update your public information</p>
+                            </div>
+                            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                                <a href="/beauty/dashboard" class="btn btn-light text-dark btn-portal-secondary">
+                                    <i class="fa fa-arrow-left"/> Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8 offset-lg-2">
+                            <t t-if="message">
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <t t-esc="message"/>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                                </div>
+                            </t>
+                            <t t-if="error">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <t t-esc="error"/>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                                </div>
+                            </t>
+
+                            <div class="card portal-card">
+                                <div class="card-body">
+                                    <form method="post" class="form">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                        <h5 class="mb-3 text-dark">Basic Information</h5>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted">Name</label>
+                                                <input type="text" class="form-control" t-att-value="professional.name" disabled="disabled"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted">Type</label>
+                                                <input type="text" class="form-control" t-att-value="professional.professional_type_display" disabled="disabled"/>
+                                            </div>
+                                        </div>
+
+                                        <h5 class="mb-3 text-dark">Contact Information</h5>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted">Email</label>
+                                                <input type="email" name="email" class="form-control" t-att-value="professional.email or ''"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted">Phone</label>
+                                                <input type="tel" name="phone" class="form-control" t-att-value="professional.phone or ''"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">Location</label>
+                                            <input type="text" name="location" class="form-control" placeholder="Your shop location" t-att-value="professional.location or ''"/>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">Biography</label>
+                                            <textarea name="bio" class="form-control" rows="5" placeholder="Tell customers about yourself..."><t t-esc="professional.bio or ''"/></textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">Public Booking Link</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" t-att-value="professional.booking_url" disabled="disabled"/>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard(this)">
+                                                    <i class="fa fa-copy"/> Copy
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <h5 class="mb-3 text-dark">Your Services</h5>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Service Name</th>
+                                                        <th>Price</th>
+                                                        <th>Duration</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr t-foreach="professional.service_ids" t-as="service">
+                                                        <td><t t-esc="service.name"/></td>
+                                                        <td>$<t t-esc="'{:.2f}'.format(service.price)"/></td>
+                                                        <td><t t-esc="service.duration"/> min</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <p class="text-muted small mb-4">Services are managed in the admin panel.</p>
+
+                                        <div class="mt-4 d-flex gap-2 flex-wrap">
+                                            <button type="submit" class="btn btn-portal-primary">
+                                                <i class="fa fa-save"/> Save Changes
+                                            </button>
+                                            <a href="/beauty/dashboard" class="btn btn-outline-secondary btn-portal-secondary">Cancel</a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function copyToClipboard(button) {
+                        const link = button.previousElementSibling.value;
+                        navigator.clipboard.writeText(link).then(() => {
+                            button.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                                button.innerHTML = '<i class="fa fa-copy"/> Copy';
+                            }, 2000);
+                        });
+                    }
+                </script>
+            </t>
+        </template>
+
+        <!-- Bookings Management Template -->
+        <template id="portal_bookings" name="Manage Bookings">
+            <t t-call="website.layout">
+                <style>
+                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
+                    .portal-page { padding: 28px 0 40px; }
+                    .portal-header { background: linear-gradient(135deg, #1f2937 0%, #7c3aed 100%); border-radius: 24px; padding: 24px 22px; color: #fff; box-shadow: 0 18px 40px rgba(124,58,237,0.18); }
+                    .portal-card { background: #fff; border-radius: 18px; border: 1px solid rgba(15,23,42,0.06); box-shadow: 0 14px 30px rgba(15,23,42,0.06); }
+                    .portal-card .card-header { background: #fff; border-bottom: 1px solid rgba(15,23,42,0.06); }
+                    .portal-card .card-body { padding: 1.25rem; }
+                    .btn-portal-primary { background: linear-gradient(135deg, #111827 0%, #7c3aed 100%); border: none; border-radius: 999px; padding: 0.75rem 1.4rem; color: #fff; font-weight: 600; }
+                    .btn-portal-secondary { border-radius: 999px; padding: 0.75rem 1.4rem; font-weight: 600; }
+                    .booking-card { min-height: 100%; }
+                    .table thead th { background: #f8fafc; color: #475569; }
+                </style>
+                <div class="container portal-page">
+                    <div class="portal-header mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <h1 class="mb-1" style="color: #fff;">Manage Bookings</h1>
+                                <p class="mb-0 text-white-50">Review, confirm and complete appointments</p>
+                            </div>
+                            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                                <a href="/beauty/dashboard" class="btn btn-light text-dark btn-portal-secondary">
+                                    <i class="fa fa-arrow-left"/> Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="btn-group" role="group">
+                            <a href="/beauty/bookings" class="btn btn-outline-primary btn-portal-secondary">All</a>
+                            <a href="/beauty/bookings?state=draft" class="btn btn-outline-warning btn-portal-secondary">Draft</a>
+                            <a href="/beauty/bookings?state=confirmed" class="btn btn-outline-info btn-portal-secondary">Confirmed</a>
+                            <a href="/beauty/bookings?state=completed" class="btn btn-outline-success btn-portal-secondary">Completed</a>
+                        </div>
+                    </div>
+
+                    <t t-if="bookings">
+                        <div class="row">
+                            <t t-foreach="bookings" t-as="booking">
+                                <div class="col-md-6 mb-3">
+                                    <div class="card portal-card booking-card">
+                                        <div class="card-header">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h5 class="mb-0"><t t-esc="booking.name"/></h5>
+                                                    <small class="text-muted"><t t-esc="booking.customer_name"/></small>
+                                                </div>
+                                                <span t-if="booking.state == 'draft'" class="badge bg-warning">Draft</span>
+                                                <span t-elif="booking.state == 'confirmed'" class="badge bg-info">Confirmed</span>
+                                                <span t-elif="booking.state == 'completed'" class="badge bg-success">Completed</span>
+                                                <span t-elif="booking.state == 'cancelled'" class="badge bg-danger">Cancelled</span>
+                                                <span t-elif="booking.state == 'no_show'" class="badge bg-secondary">No Show</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="mb-2"><strong>Service:</strong> <t t-esc="booking.service_id.name"/></p>
+                                            <p class="mb-2"><strong>Date &amp; Time:</strong> <t t-esc="booking.appointment_date.strftime('%Y-%m-%d %H:%M')"/></p>
+                                            <p class="mb-2"><strong>Duration:</strong> <t t-esc="booking.duration"/> minutes</p>
+                                            <p class="mb-2"><strong>Price:</strong> $<t t-esc="'{:.2f}'.format(booking.price)"/></p>
+                                            <t t-if="booking.customer_phone">
+                                                <p class="mb-2"><strong>Phone:</strong> <t t-esc="booking.customer_phone"/></p>
+                                            </t>
+                                            <t t-if="booking.notes">
+                                                <p class="mb-2"><strong>Notes:</strong><br/><em><t t-esc="booking.notes"/></em></p>
+                                            </t>
+                                        </div>
+                                        <div class="card-footer bg-white border-0 pt-0">
+                                            <form method="post" class="d-flex gap-2" style="flex-wrap: wrap;">
+                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                <t t-if="booking.state == 'draft'">
+                                                    <button type="submit" t-att-formaction="'/beauty/booking/' + str(booking.id) + '/confirm'" class="btn btn-sm btn-success" onclick="return confirm('Confirm this booking?');">
+                                                        <i class="fa fa-check"/> Confirm
+                                                    </button>
+                                                </t>
+                                                <t t-if="booking.state == 'confirmed'">
+                                                    <button type="submit" t-att-formaction="'/beauty/booking/' + str(booking.id) + '/complete'" class="btn btn-sm btn-success" onclick="return confirm('Mark as completed?');">
+                                                        <i class="fa fa-check-double"/> Complete
+                                                    </button>
+                                                </t>
+                                                <t t-if="booking.state in ('draft', 'confirmed')">
+                                                    <button type="submit" t-att-formaction="'/beauty/booking/' + str(booking.id) + '/cancel'" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this booking?');">
+                                                        <i class="fa fa-times"/> Cancel
+                                                    </button>
+                                                </t>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="alert alert-info rounded-4 border-0 shadow-sm">
+                            <i class="fa fa-info-circle"/> No bookings found.
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </template>
+
+        <!-- Availability Management Template -->
+        <template id="portal_availability" name="Working Hours">
+            <t t-call="website.layout">
+                <style>
+                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
+                    .portal-page { padding: 28px 0 40px; }
+                    .portal-header { background: linear-gradient(135deg, #1f2937 0%, #7c3aed 100%); border-radius: 24px; padding: 24px 22px; color: #fff; box-shadow: 0 18px 40px rgba(124,58,237,0.18); }
+                    .portal-card { background: #fff; border-radius: 18px; border: 1px solid rgba(15,23,42,0.06); box-shadow: 0 14px 30px rgba(15,23,42,0.06); }
+                    .portal-card .card-body { padding: 1.5rem; }
+                    .btn-portal-secondary { border-radius: 999px; padding: 0.75rem 1.4rem; font-weight: 600; }
+                    .table thead th { background: #f8fafc; color: #475569; }
+                </style>
+                <div class="container portal-page">
+                    <div class="portal-header mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <h1 class="mb-1" style="color: #fff;">Working Hours</h1>
+                                <p class="mb-0 text-white-50">Schedule when customers can book with you</p>
+                            </div>
+                            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                                <a href="/beauty/dashboard" class="btn btn-light text-dark btn-portal-secondary">
+                                    <i class="fa fa-arrow-left"/> Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card portal-card">
+                        <div class="card-body">
+                            <p class="text-muted mb-4">Your working hours define when customers can book appointments. Availability is displayed here for each day of the week.</p>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Day</th>
+                                            <th>Status</th>
+                                            <th>Time</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="availability_ids" t-as="avail">
+                                            <tr>
+                                                <td>
+                                                    <t t-set="day_names" t-value="{'0': 'Monday', '1': 'Tuesday', '2': 'Wednesday', '3': 'Thursday', '4': 'Friday', '5': 'Saturday', '6': 'Sunday'}"/>
+                                                    <t t-esc="day_names[str(avail.day_of_week)]"/>
+                                                </td>
+                                                <td>
+                                                    <span t-if="avail.is_working_day" class="badge bg-success">Working</span>
+                                                    <span t-else="" class="badge bg-secondary">Off</span>
+                                                </td>
+                                                <td>
+                                                    <t t-if="avail.is_working_day">
+                                                        <t t-esc="'{:02d}:{:02d} - {:02d}:{:02d}'.format(int(avail.time_start), int((avail.time_start % 1) * 60), int(avail.time_end), int((avail.time_end % 1) * 60))"/>
+                                                    </t>
+                                                    <t t-else="">—</t>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">Edit in admin panel</small>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-muted small mt-3 mb-0">
+                                <i class="fa fa-info-circle"/> To update your working hours, please use the admin panel or contact support.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!-- Access Denied Template -->
+        <template id="portal_access_denied" name="Access Denied">
+            <t t-call="website.layout">
+                <style>
+                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
+                    .portal-page { padding: 60px 0; }
+                    .access-card { background: #fff; border-radius: 22px; border: 1px solid rgba(220,38,38,0.12); box-shadow: 0 20px 40px rgba(127, 29, 29, 0.08); }
+                    .btn-portal-primary { background: linear-gradient(135deg, #111827 0%, #7c3aed 100%); border: none; border-radius: 999px; padding: 0.75rem 1.4rem; color: #fff; font-weight: 600; }
+                </style>
+                <div class="container portal-page">
+                    <div class="access-card p-4 p-md-5">
+                        <div class="alert alert-danger border-0 mb-0" role="alert" style="background: rgba(254,226,226,0.7); color: #7f1d1d;">
+                            <h4 class="alert-heading mb-3">Access Denied</h4>
+                            <p class="mb-3">You are not registered as a beauty professional. Please contact an administrator.</p>
+                            <hr/>
+                            <a href="/web" class="btn btn-portal-primary">Go to Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>
