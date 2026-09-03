@@ -3,28 +3,54 @@
     <data>
         <!-- Common Minimalist Theme & Navbar Header Snippet -->
         <template id="portal_nav" name="Portal Navigation">
-            <nav class="site-nav">
-                <div class="container d-flex justify-content-between align-items-center">
+            <nav class="navbar navbar-expand-lg site-nav sticky-top">
+                <div class="container">
                     <a href="/beauty/dashboard" class="brand">
                         <div class="brand-icon-box"><i class="fa fa-cut"/></div>
                         <span>Beauty Booking</span>
                     </a>
-                    <div class="d-flex align-items-center gap-3">
-                        <a href="/beauty/dashboard" t-att-class="'nav-link-item ' + ('active' if active_page == 'dashboard' else '')">Dashboard</a>
-                        <a href="/beauty/bookings" t-att-class="'nav-link-item ' + ('active' if active_page == 'bookings' else '')">Bookings</a>
-                        <a href="/beauty/services" t-att-class="'nav-link-item ' + ('active' if active_page == 'services' else '')">Services</a>
-                        <a href="/beauty/availability" t-att-class="'nav-link-item ' + ('active' if active_page == 'availability' else '')">Schedule</a>
-                        <a href="/beauty/profile" t-att-class="'nav-link-item ' + ('active' if active_page == 'profile' else '')">Profile</a>
-                        <a href="/beauty/email_sandbox" t-att-class="'nav-link-item ' + ('active' if active_page == 'sandbox' else '')">Email Sandbox</a>
-                        
-                        <!-- Dark Mode Toggle Button -->
-                        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
-                            <i id="themeToggleIcon" class="fa fa-moon-o"/>
-                        </button>
 
-                        <a href="/beauty/logout" class="btn-danger-custom-sm">
-                            <i class="fa fa-sign-out me-1"/> Logout
-                        </a>
+                    <!-- Mobile Right Controls (Theme Toggle + Hamburger) -->
+                    <div class="d-flex align-items-center gap-2 d-lg-none">
+                        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+                            <i class="themeToggleIcon fa fa-moon-o"/>
+                        </button>
+                        <button class="navbar-toggler custom-toggler border-0 p-1" type="button" data-bs-toggle="collapse" data-bs-target="#portalNavCollapse" aria-controls="portalNavCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                            <i class="fa fa-bars fs-5" style="color: var(--text-main);"/>
+                        </button>
+                    </div>
+
+                    <!-- Collapsible Menu -->
+                    <div class="collapse navbar-collapse" id="portalNavCollapse">
+                        <div class="navbar-nav ms-auto align-items-lg-center gap-lg-3 pt-3 pt-lg-0">
+                            <a href="/beauty/dashboard" t-att-class="'nav-link-item ' + ('active' if active_page == 'dashboard' else '')">
+                                <i class="fa fa-th-large me-2 d-lg-none"/>Dashboard
+                            </a>
+                            <a href="/beauty/bookings" t-att-class="'nav-link-item ' + ('active' if active_page == 'bookings' else '')">
+                                <i class="fa fa-calendar me-2 d-lg-none"/>Bookings
+                            </a>
+                            <a href="/beauty/services" t-att-class="'nav-link-item ' + ('active' if active_page == 'services' else '')">
+                                <i class="fa fa-cut me-2 d-lg-none"/>Services
+                            </a>
+                            <a href="/beauty/availability" t-att-class="'nav-link-item ' + ('active' if active_page == 'availability' else '')">
+                                <i class="fa fa-clock-o me-2 d-lg-none"/>Schedule
+                            </a>
+                            <a href="/beauty/profile" t-att-class="'nav-link-item ' + ('active' if active_page == 'profile' else '')">
+                                <i class="fa fa-user me-2 d-lg-none"/>Profile
+                            </a>
+                            <a href="/beauty/email_sandbox" t-att-class="'nav-link-item ' + ('active' if active_page == 'sandbox' else '')">
+                                <i class="fa fa-envelope-o me-2 d-lg-none"/>Email Sandbox
+                            </a>
+                            
+                            <!-- Desktop Dark Mode Toggle Button -->
+                            <button class="theme-toggle-btn d-none d-lg-inline-flex ms-lg-1" onclick="toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+                                <i class="themeToggleIcon fa fa-moon-o"/>
+                            </button>
+
+                            <a href="/beauty/logout" class="btn-danger-custom-sm mt-3 mt-lg-0">
+                                <i class="fa fa-sign-out me-1"/> Logout
+                            </a>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -267,6 +293,48 @@
                         .table-minimal td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid var(--border-color); color: var(--text-main); background: transparent; }
                         .table-minimal tr:last-child td { border-bottom: none; }
                         .table-minimal tbody tr:hover { background-color: var(--input-bg); }
+
+                        /* Mobile-First Responsive Styles */
+                        @media (max-width: 991.98px) {
+                            .site-nav .navbar-nav {
+                                padding-top: 1rem;
+                                padding-bottom: 0.75rem;
+                                border-top: 1px solid var(--border-color);
+                                margin-top: 0.85rem;
+                            }
+                            .nav-link-item {
+                                display: flex;
+                                align-items: center;
+                                padding: 0.75rem 1rem;
+                                font-size: 0.95rem;
+                                border-radius: 12px;
+                                min-height: 44px;
+                            }
+                            .nav-link-item:hover, .nav-link-item.active {
+                                background-color: var(--input-bg);
+                            }
+                            .custom-toggler {
+                                border: 1px solid var(--border-color) !important;
+                                background-color: var(--input-bg);
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 12px;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                transition: all 0.2s ease;
+                            }
+                        }
+                        @media (max-width: 767.98px) {
+                            .portal-wrap { padding: 18px 12px 40px !important; }
+                            .hero-card { padding: 20px !important; border-radius: 16px !important; }
+                            .minimal-card { border-radius: 16px !important; }
+                            .minimal-card .card-body { padding: 1.2rem !important; }
+                            .stat-val { font-size: 1.7rem !important; }
+                            .form-control, .form-select, textarea { font-size: 16px !important; }
+                            .btn-accent, .btn-secondary-custom { width: 100%; justify-content: center; }
+                            .table-minimal th, .table-minimal td { padding: 0.75rem 0.5rem !important; font-size: 0.85rem; }
+                        }
                     </style>
                 </head>
                 <body>
@@ -287,36 +355,36 @@
                             </div>
                         </div>
 
-                        <!-- Statistics -->
+                        <!-- Statistics 2x2 on mobile, 4 across on desktop -->
                         <div class="row g-3">
-                            <div class="col-md-3">
-                                <div class="card minimal-card">
+                            <div class="col-6 col-lg-3">
+                                <div class="card minimal-card h-100">
                                     <div class="card-body">
                                         <div class="text-uppercase small fw-bold mb-1" style="color: var(--text-muted);">Total Bookings</div>
                                         <div class="stat-val"><t t-esc="total_bookings"/></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card minimal-card">
+                            <div class="col-6 col-lg-3">
+                                <div class="card minimal-card h-100">
                                     <div class="card-body">
                                         <div class="text-uppercase small fw-bold mb-1" style="color: var(--text-muted);">Completed</div>
                                         <div class="stat-val text-success"><t t-esc="completed_bookings"/></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card minimal-card">
+                            <div class="col-6 col-lg-3">
+                                <div class="card minimal-card h-100">
                                     <div class="card-body">
                                         <div class="text-uppercase small fw-bold mb-1" style="color: var(--text-muted);">Services Offered</div>
                                         <div class="stat-val text-primary"><t t-esc="len(professional.service_ids)"/></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card minimal-card">
+                            <div class="col-6 col-lg-3">
+                                <div class="card minimal-card h-100">
                                     <div class="card-body">
-                                        <div class="text-uppercase small fw-bold mb-1" style="color: var(--text-muted);">Account Verification</div>
+                                        <div class="text-uppercase small fw-bold mb-1" style="color: var(--text-muted);">Account Status</div>
                                         <div class="mt-2">
                                             <span t-if="professional.verified" class="badge bg-success rounded-pill px-3 py-2">Verified Pro</span>
                                             <span t-else="" class="badge rounded-pill px-3 py-2" style="background: var(--input-bg); color: var(--text-muted); border: 1px solid var(--border-color);">Standard Profile</span>
@@ -369,29 +437,29 @@
                             </div>
                         </div>
 
-                        <!-- Hub Quick Actions -->
+                        <!-- Hub Quick Actions (2x2 on mobile, 4 across on desktop) -->
                         <div class="card minimal-card mt-4">
                             <div class="card-header bg-transparent border-0 pt-4 px-4">
                                 <h5 class="fw-bold mb-0" style="color: var(--text-main);">Management Hub</h5>
                             </div>
                             <div class="card-body px-4">
                                 <div class="row g-3">
-                                    <div class="col-md-3">
+                                    <div class="col-6 col-lg-3">
                                         <a href="/beauty/bookings" class="action-link">
                                             <i class="fa fa-calendar me-1"/> Manage Bookings
                                         </a>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-6 col-lg-3">
                                         <a href="/beauty/services" class="action-link">
                                             <i class="fa fa-cut me-1"/> Catalogue Services
                                         </a>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-6 col-lg-3">
                                         <a href="/beauty/availability" class="action-link">
                                             <i class="fa fa-clock-o me-1"/> Schedule Hours
                                         </a>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-6 col-lg-3">
                                         <a href="/beauty/profile" class="action-link">
                                             <i class="fa fa-user me-1"/> Profile Settings
                                         </a>
@@ -410,10 +478,9 @@
                             updateThemeIcon(next);
                         }
                         function updateThemeIcon(theme) {
-                            const icon = document.getElementById('themeToggleIcon');
-                            if (icon) {
-                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
-                            }
+                            document.querySelectorAll('.themeToggleIcon, #themeToggleIcon').forEach(icon => {
+                                icon.className = theme === 'dark' ? 'themeToggleIcon fa fa-sun-o' : 'themeToggleIcon fa fa-moon-o';
+                            });
                         }
                         (function() {
                             const saved = localStorage.getItem('beauty_theme') || 'light';
@@ -477,6 +544,45 @@
                         .minimal-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); }
                         .form-control, .form-select, textarea { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; padding: 11px 14px; }
                         .form-control:focus, .form-select:focus, textarea:focus { border-color: var(--accent); background-color: var(--bg-card); color: var(--text-main); }
+
+                        /* Mobile-First Responsive Styles */
+                        @media (max-width: 991.98px) {
+                            .site-nav .navbar-nav {
+                                padding-top: 1rem;
+                                padding-bottom: 0.75rem;
+                                border-top: 1px solid var(--border-color);
+                                margin-top: 0.85rem;
+                            }
+                            .nav-link-item {
+                                display: flex;
+                                align-items: center;
+                                padding: 0.75rem 1rem;
+                                font-size: 0.95rem;
+                                border-radius: 12px;
+                                min-height: 44px;
+                            }
+                            .nav-link-item:hover, .nav-link-item.active {
+                                background-color: var(--input-bg);
+                            }
+                            .custom-toggler {
+                                border: 1px solid var(--border-color) !important;
+                                background-color: var(--input-bg);
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 12px;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                transition: all 0.2s ease;
+                            }
+                        }
+                        @media (max-width: 767.98px) {
+                            .portal-wrap { padding: 18px 12px 40px !important; }
+                            .minimal-card { border-radius: 16px !important; }
+                            .minimal-card .card-body { padding: 1.25rem !important; }
+                            .form-control, .form-select, textarea { font-size: 16px !important; }
+                            .btn-accent, .btn-secondary-custom { width: 100%; justify-content: center; }
+                        }
                     </style>
                 </head>
                 <body>
@@ -485,7 +591,7 @@
                     <div class="container portal-wrap">
                         <div class="row">
                             <div class="col-lg-10 offset-lg-1">
-                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="d-flex justify-content-between align-items-start align-items-sm-center flex-column flex-sm-row gap-3 mb-4">
                                     <div>
                                         <h2 class="fw-bold mb-1" style="color: var(--text-main);">Profile Settings</h2>
                                         <p class="mb-0" style="color: var(--text-muted);">Manage your public booking handle, biography, and security settings</p>
@@ -594,10 +700,9 @@
                             updateThemeIcon(next);
                         }
                         function updateThemeIcon(theme) {
-                            const icon = document.getElementById('themeToggleIcon');
-                            if (icon) {
-                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
-                            }
+                            document.querySelectorAll('.themeToggleIcon, #themeToggleIcon').forEach(icon => {
+                                icon.className = theme === 'dark' ? 'themeToggleIcon fa fa-sun-o' : 'themeToggleIcon fa fa-moon-o';
+                            });
                         }
                         (function() {
                             const saved = localStorage.getItem('beauty_theme') || 'light';
@@ -660,13 +765,52 @@
                         .portal-wrap { padding: 32px 0 50px; }
                         .minimal-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); }
                         .form-control, .form-select { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; padding: 11px 14px; }
+
+                        /* Mobile-First Responsive Styles */
+                        @media (max-width: 991.98px) {
+                            .site-nav .navbar-nav {
+                                padding-top: 1rem;
+                                padding-bottom: 0.75rem;
+                                border-top: 1px solid var(--border-color);
+                                margin-top: 0.85rem;
+                            }
+                            .nav-link-item {
+                                display: flex;
+                                align-items: center;
+                                padding: 0.75rem 1rem;
+                                font-size: 0.95rem;
+                                border-radius: 12px;
+                                min-height: 44px;
+                            }
+                            .nav-link-item:hover, .nav-link-item.active {
+                                background-color: var(--input-bg);
+                            }
+                            .custom-toggler {
+                                border: 1px solid var(--border-color) !important;
+                                background-color: var(--input-bg);
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 12px;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                transition: all 0.2s ease;
+                            }
+                        }
+                        @media (max-width: 767.98px) {
+                            .portal-wrap { padding: 18px 12px 40px !important; }
+                            .minimal-card { border-radius: 16px !important; }
+                            .minimal-card .card-body { padding: 1.25rem !important; }
+                            .form-control, .form-select { font-size: 16px !important; }
+                            .btn-accent, .btn-secondary-custom { width: 100%; justify-content: center; }
+                        }
                     </style>
                 </head>
                 <body>
                     <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'bookings'"/></t>
 
                     <div class="container portal-wrap">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex justify-content-between align-items-start align-items-sm-center flex-column flex-sm-row gap-3 mb-4">
                             <div>
                                 <h2 class="fw-bold mb-1" style="color: var(--text-main);">Manage Bookings</h2>
                                 <p class="mb-0" style="color: var(--text-muted);">Review customer appointments or create manual walk-in bookings</p>
@@ -789,10 +933,9 @@
                             updateThemeIcon(next);
                         }
                         function updateThemeIcon(theme) {
-                            const icon = document.getElementById('themeToggleIcon');
-                            if (icon) {
-                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
-                            }
+                            document.querySelectorAll('.themeToggleIcon, #themeToggleIcon').forEach(icon => {
+                                icon.className = theme === 'dark' ? 'themeToggleIcon fa fa-sun-o' : 'themeToggleIcon fa fa-moon-o';
+                            });
                         }
                         (function() {
                             const saved = localStorage.getItem('beauty_theme') || 'light';
@@ -868,13 +1011,53 @@
                         .table-minimal td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid var(--border-color); color: var(--text-main); background: transparent; }
                         .table-minimal tr:last-child td { border-bottom: none; }
                         .table-minimal tbody tr:hover { background-color: var(--input-bg); }
+
+                        /* Mobile-First Responsive Styles */
+                        @media (max-width: 991.98px) {
+                            .site-nav .navbar-nav {
+                                padding-top: 1rem;
+                                padding-bottom: 0.75rem;
+                                border-top: 1px solid var(--border-color);
+                                margin-top: 0.85rem;
+                            }
+                            .nav-link-item {
+                                display: flex;
+                                align-items: center;
+                                padding: 0.75rem 1rem;
+                                font-size: 0.95rem;
+                                border-radius: 12px;
+                                min-height: 44px;
+                            }
+                            .nav-link-item:hover, .nav-link-item.active {
+                                background-color: var(--input-bg);
+                            }
+                            .custom-toggler {
+                                border: 1px solid var(--border-color) !important;
+                                background-color: var(--input-bg);
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 12px;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                transition: all 0.2s ease;
+                            }
+                        }
+                        @media (max-width: 767.98px) {
+                            .portal-wrap { padding: 18px 12px 40px !important; }
+                            .minimal-card { border-radius: 16px !important; }
+                            .minimal-card .card-body { padding: 1.25rem !important; }
+                            .form-control, .form-select, textarea { font-size: 16px !important; }
+                            .btn-accent, .btn-secondary-custom { width: 100%; justify-content: center; }
+                            .table-minimal th, .table-minimal td { padding: 0.75rem 0.5rem !important; font-size: 0.85rem; }
+                        }
                     </style>
                 </head>
                 <body>
                     <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'services'"/></t>
 
                     <div class="container portal-wrap">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex justify-content-between align-items-start align-items-sm-center flex-column flex-sm-row gap-3 mb-4">
                             <div>
                                 <h2 class="fw-bold mb-1" style="color: var(--text-main);">Catalogue Services</h2>
                                 <p class="mb-0" style="color: var(--text-muted);">Manage your service pictures, tagged prices, and durations</p>
@@ -1039,10 +1222,9 @@
                             updateThemeIcon(next);
                         }
                         function updateThemeIcon(theme) {
-                            const icon = document.getElementById('themeToggleIcon');
-                            if (icon) {
-                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
-                            }
+                            document.querySelectorAll('.themeToggleIcon, #themeToggleIcon').forEach(icon => {
+                                icon.className = theme === 'dark' ? 'themeToggleIcon fa fa-sun-o' : 'themeToggleIcon fa fa-moon-o';
+                            });
                         }
                         (function() {
                             const saved = localStorage.getItem('beauty_theme') || 'light';
@@ -1110,13 +1292,53 @@
                         .table-minimal td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid var(--border-color); color: var(--text-main); background: transparent; }
                         .table-minimal tr:last-child td { border-bottom: none; }
                         .table-minimal tbody tr:hover { background-color: var(--input-bg); }
+
+                        /* Mobile-First Responsive Styles */
+                        @media (max-width: 991.98px) {
+                            .site-nav .navbar-nav {
+                                padding-top: 1rem;
+                                padding-bottom: 0.75rem;
+                                border-top: 1px solid var(--border-color);
+                                margin-top: 0.85rem;
+                            }
+                            .nav-link-item {
+                                display: flex;
+                                align-items: center;
+                                padding: 0.75rem 1rem;
+                                font-size: 0.95rem;
+                                border-radius: 12px;
+                                min-height: 44px;
+                            }
+                            .nav-link-item:hover, .nav-link-item.active {
+                                background-color: var(--input-bg);
+                            }
+                            .custom-toggler {
+                                border: 1px solid var(--border-color) !important;
+                                background-color: var(--input-bg);
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 12px;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                transition: all 0.2s ease;
+                            }
+                        }
+                        @media (max-width: 767.98px) {
+                            .portal-wrap { padding: 18px 12px 40px !important; }
+                            .minimal-card { border-radius: 16px !important; }
+                            .minimal-card .card-body { padding: 1.25rem !important; }
+                            .form-control, .form-select { font-size: 16px !important; }
+                            .btn-accent, .btn-secondary-custom { width: 100%; justify-content: center; }
+                            .table-minimal th, .table-minimal td { padding: 0.75rem 0.5rem !important; font-size: 0.85rem; }
+                        }
                     </style>
                 </head>
                 <body>
                     <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'availability'"/></t>
 
                     <div class="container portal-wrap">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex justify-content-between align-items-start align-items-sm-center flex-column flex-sm-row gap-3 mb-4">
                             <div>
                                 <h2 class="fw-bold mb-1" style="color: var(--text-main);">Working Hours Schedule</h2>
                                 <p class="mb-0" style="color: var(--text-muted);">Set your available days and appointment hours</p>
@@ -1253,10 +1475,9 @@
                             updateThemeIcon(next);
                         }
                         function updateThemeIcon(theme) {
-                            const icon = document.getElementById('themeToggleIcon');
-                            if (icon) {
-                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
-                            }
+                            document.querySelectorAll('.themeToggleIcon, #themeToggleIcon').forEach(icon => {
+                                icon.className = theme === 'dark' ? 'themeToggleIcon fa fa-sun-o' : 'themeToggleIcon fa fa-moon-o';
+                            });
                         }
                         (function() {
                             const saved = localStorage.getItem('beauty_theme') || 'light';
@@ -1315,27 +1536,67 @@
                         .theme-toggle-btn { background: transparent; border: 1.5px solid var(--border-color); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
                         .portal-wrap { padding: 32px 0 50px; }
                         .minimal-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); }
+
+                        /* Mobile-First Responsive Styles */
+                        @media (max-width: 991.98px) {
+                            .site-nav .navbar-nav {
+                                padding-top: 1rem;
+                                padding-bottom: 0.75rem;
+                                border-top: 1px solid var(--border-color);
+                                margin-top: 0.85rem;
+                            }
+                            .nav-link-item {
+                                display: flex;
+                                align-items: center;
+                                padding: 0.75rem 1rem;
+                                font-size: 0.95rem;
+                                border-radius: 12px;
+                                min-height: 44px;
+                            }
+                            .nav-link-item:hover, .nav-link-item.active {
+                                background-color: var(--input-bg);
+                            }
+                            .custom-toggler {
+                                border: 1px solid var(--border-color) !important;
+                                background-color: var(--input-bg);
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 12px;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                transition: all 0.2s ease;
+                            }
+                        }
+                        @media (max-width: 767.98px) {
+                            .portal-wrap { padding: 18px 12px 40px !important; }
+                            .minimal-card { border-radius: 16px !important; }
+                            .minimal-card .card-body { padding: 1.25rem !important; }
+                            .btn-accent, .btn-secondary-custom, .btn-danger-custom-sm { width: 100%; justify-content: center; }
+                        }
                     </style>
                 </head>
                 <body>
                     <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'sandbox'"/></t>
 
                     <div class="container portal-wrap">
-                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                        <div class="d-flex justify-content-between align-items-start align-items-sm-center flex-column flex-sm-row gap-3 mb-4">
                             <div>
                                 <h2 class="fw-bold mb-1" style="color: var(--text-main);">Email Sandbox Inspector</h2>
-                                <p class="mb-0" style="color: var(--text-muted);">Inspect captured booking confirmation emails sent to testing SMTP (localhost:1025)</p>
+                                <p class="mb-0" style="color: var(--text-muted);">Inspect captured booking confirmation emails sent to Mailtrap Sandbox (sandbox.smtp.mailtrap.io:2525)</p>
                             </div>
-                            <div class="d-flex gap-2">
+                            <div class="d-flex flex-wrap gap-2 w-100 w-sm-auto">
                                 <form method="post" action="/beauty/email_sandbox/test" class="d-inline">
                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                     <button type="submit" class="btn-accent">
-                                        Send Test Email
+                                        <i class="fa fa-paper-plane me-1"/> Send Test Email
                                     </button>
                                 </form>
                                 <form method="post" action="/beauty/email_sandbox/clear" class="d-inline">
                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                    <button type="submit" class="btn-danger-custom-sm" style="height: 42px; padding: 0 1.2rem;">Clear Inbox</button>
+                                    <button type="submit" class="btn-danger-custom-sm" style="height: 42px; padding: 0 1.2rem;">
+                                        <i class="fa fa-trash me-1"/> Clear Inbox
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -1343,6 +1604,37 @@
                         <t t-if="message">
                             <div class="alert alert-success rounded-4 mb-4"><i class="fa fa-check-circle me-1"/> <t t-esc="message"/></div>
                         </t>
+
+                        <!-- Mailtrap Sandbox Status Card -->
+                        <div class="card minimal-card mb-4">
+                            <div class="card-body p-4">
+                                <div class="row align-items-center g-3">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="brand-icon-box" style="background: #22c55e;">
+                                                <i class="fa fa-envelope-o"/>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-0" style="color: var(--text-main);">Mailtrap Sandbox SMTP</h6>
+                                                <small style="color: var(--text-muted);">sandbox.smtp.mailtrap.io:2525 • STARTTLS • User: 5bff227338f5dc</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-md-end">
+                                        <t t-if="mailtrap_connected">
+                                            <span class="badge bg-success rounded-pill px-3 py-2">
+                                                <i class="fa fa-check-circle me-1"/> Connected &amp; Ready
+                                            </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                                <i class="fa fa-exclamation-triangle me-1"/> Disconnected
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="card minimal-card">
                             <div class="card-header bg-transparent border-0 pt-4 px-4">
@@ -1391,10 +1683,9 @@
                             updateThemeIcon(next);
                         }
                         function updateThemeIcon(theme) {
-                            const icon = document.getElementById('themeToggleIcon');
-                            if (icon) {
-                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
-                            }
+                            document.querySelectorAll('.themeToggleIcon, #themeToggleIcon').forEach(icon => {
+                                icon.className = theme === 'dark' ? 'themeToggleIcon fa fa-sun-o' : 'themeToggleIcon fa fa-moon-o';
+                            });
                         }
                         (function() {
                             const saved = localStorage.getItem('beauty_theme') || 'light';

@@ -4,6 +4,14 @@ from odoo import fields, http
 from odoo.exceptions import AccessError, ValidationError
 from odoo.http import request
 
+from ..models.mailtrap_client import (
+    MAILTRAP_HOST,
+    MAILTRAP_PORT,
+    MAILTRAP_USER,
+    send_mailtrap_email,
+    test_mailtrap_connection,
+)
+
 
 class BeautyProfessionalPortal(http.Controller):
     """Professional portal for managing bookings, services, availability, and profile."""
@@ -609,13 +617,25 @@ class BeautyProfessionalPortal(http.Controller):
 
         # Active mail server status
         mail_servers = request.env['ir.mail_server'].sudo().search([('active', '=', True)])
-        sandbox_server = mail_servers.filtered(lambda s: s.smtp_port == 1025 or 'sandbox' in s.name.lower())
+        sandbox_server = mail_servers.filtered(
+            lambda s: 'mailtrap' in (s.name or '').lower()
+            or 'mailtrap' in (s.smtp_host or '').lower()
+            or s.smtp_port in (2525, 1025)
+            or 'sandbox' in (s.name or '').lower()
+        )
+
+        conn_ok, conn_msg = test_mailtrap_connection()
 
         values = {
             'professional': professional,
             'emails': emails,
             'mail_servers': mail_servers,
             'sandbox_server': sandbox_server[0] if sandbox_server else None,
+            'mailtrap_host': MAILTRAP_HOST,
+            'mailtrap_port': MAILTRAP_PORT,
+            'mailtrap_user': MAILTRAP_USER,
+            'mailtrap_connected': conn_ok,
+            'mailtrap_status_msg': conn_msg,
             'message': request.session.pop('success_message', None),
             'error': request.session.pop('error_message', None),
         }
@@ -663,8 +683,32 @@ class BeautyProfessionalPortal(http.Controller):
                     'state': 'confirmed',
                 })
 
+            # Trigger standard booking confirmation dispatch
             booking.action_send_confirmation_email()
-            request.session['success_message'] = f'Test booking confirmation email sent for reference {booking.name}! Check the sandbox log below.'
+
+            # Also send explicit test email via smtplib to verify the raw sandbox pipeline
+            sender = f"{professional.name} <from@example.com>" if professional.name else "Private Person <from@example.com>"
+            receiver = f"{booking.customer_name} <{booking.customer_email}>"
+            test_msg = (
+                f"Subject: Hi Mailtrap - Booking Test\n"
+                f"To: {receiver}\n"
+                f"From: {sender}\n\n"
+                f"This is a test e-mail message for Beauty Booking appointment {booking.name}."
+            )
+            smtp_success, smtp_info = send_mailtrap_email(
+                sender=sender,
+                receiver=receiver,
+                subject=f"Hi Mailtrap - Booking {booking.name}",
+                message_text=test_msg,
+            )
+
+            if smtp_success:
+                request.session['success_message'] = (
+                    f'Test email sent to Mailtrap Sandbox ({MAILTRAP_HOST}:{MAILTRAP_PORT}) '
+                    f'for booking reference {booking.name}! Check your Mailtrap inbox.'
+                )
+            else:
+                request.session['error_message'] = f'Mailtrap send notice: {smtp_info}'
         except Exception as error:
             request.session['error_message'] = str(error)
 

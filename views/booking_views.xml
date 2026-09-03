@@ -16,6 +16,10 @@
                 <field name="service_id"/>
                 <field name="appointment_date"/>
                 <field name="price"/>
+                <field name="payment_status" widget="badge"
+                       decoration-success="payment_status == 'paid'"
+                       decoration-warning="payment_status == 'pending'"
+                       decoration-danger="payment_status == 'failed'"/>
                 <field name="state"
                 widget="statusbar"
                 statusbar_visible="draft,confirmed,completed,no_show,cancelled"/>
@@ -42,6 +46,14 @@
                         type="object"
                         class="oe_highlight"
                         attrs="{'invisible': [('state', '!=', 'draft')]}"
+                    />
+
+                    <button
+                        name="action_pay_pesepay"
+                        string="Pay with Pesepay"
+                        type="object"
+                        class="oe_highlight"
+                        attrs="{'invisible': [('payment_status', '==', 'paid')]}"
                     />
 
                     <button
@@ -103,6 +115,7 @@
                         <group>
                             <field name="duration"/>
                             <field name="price"/>
+                            <field name="payment_status"/>
                         </group>
 
                     </group>
@@ -111,6 +124,23 @@
 
                         <page string="Notes">
                             <field name="notes"/>
+                        </page>
+
+                        <page string="Payments">
+                            <field name="payment_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="amount"/>
+                                    <field name="currency"/>
+                                    <field name="payment_method"/>
+                                    <field name="pesepay_reference"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'paid'"
+                                           decoration-warning="state == 'pending'"
+                                           decoration-danger="state == 'failed'"/>
+                                    <field name="payment_date"/>
+                                </tree>
+                            </field>
                         </page>
 
                     </notebook>

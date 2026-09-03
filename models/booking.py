@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
+from .mailtrap_client import send_mailtrap_email
 
 
 class BeautyBooking(models.Model):
@@ -78,6 +79,51 @@ class BeautyBooking(models.Model):
         tracking=True
     )
 
+    payment_ids = fields.One2many(
+        'beauty.payment',
+        'booking_id',
+        string='Payments'
+    )
+
+    payment_status = fields.Selection(
+        selection=[
+            ('unpaid', 'Unpaid'),
+            ('pending', 'Pending Payment'),
+            ('paid', 'Paid'),
+            ('failed', 'Failed'),
+        ],
+        string='Payment Status',
+        compute='_compute_payment_status',
+        store=True,
+        default='unpaid'
+    )
+
+    @api.depends('payment_ids.state')
+    def _compute_payment_status(self):
+        for record in self:
+            states = record.payment_ids.mapped('state')
+            if 'paid' in states:
+                record.payment_status = 'paid'
+            elif 'pending' in states:
+                record.payment_status = 'pending'
+            elif 'failed' in states:
+                record.payment_status = 'failed'
+            else:
+                record.payment_status = 'unpaid'
+
+    def action_pay_pesepay(self):
+        """Initiate or resume a Pesepay payment for this booking."""
+        self.ensure_one()
+        payment = self.payment_ids.filtered(lambda p: p.state in ('draft', 'pending'))[:1]
+        if not payment:
+            payment = self.env['beauty.payment'].create({
+                'booking_id': self.id,
+                'amount': self.price,
+                'currency': 'USD',
+                'state': 'draft',
+            })
+        return payment.action_initiate_payment()
+
     @api.model
     def create(self, vals):
         """Auto-generate booking reference using sequence and dispatch confirmation email."""
@@ -146,8 +192,9 @@ class BeautyBooking(models.Model):
                 </div>
             </div>
             """
-            self.env['mail.mail'].sudo().create({
-                'subject': f'Booking Confirmed: {record.name} with {record.professional_id.name}',
+            mail_subject = f'Booking Confirmed: {record.name} with {record.professional_id.name}'
+            mail = self.env['mail.mail'].sudo().create({
+                'subject': mail_subject,
                 'email_from': email_from,
                 'email_to': record.customer_email,
                 'body_html': body_html,
@@ -155,6 +202,31 @@ class BeautyBooking(models.Model):
                 'model': 'beauty.booking',
                 'res_id': record.id,
             })
+            try:
+                mail.send()
+            except Exception:
+                pass
+
+            # Direct dispatch to Mailtrap Sandbox via smtplib
+            try:
+                plain_summary = (
+                    f"Hello {record.customer_name},\n\n"
+                    f"Your appointment {record.name} has been confirmed!\n"
+                    f"Professional: {record.professional_id.name}\n"
+                    f"Service: {record.service_id.name}\n"
+                    f"Date: {record.appointment_date}\n"
+                    f"Duration: {record.duration} mins\n"
+                    f"Total: ${record.price:.2f}\n"
+                )
+                send_mailtrap_email(
+                    sender=email_from,
+                    receiver=f"{record.customer_name} <{record.customer_email}>",
+                    subject=mail_subject,
+                    message_text=plain_summary,
+                    message_html=body_html,
+                )
+            except Exception:
+                pass
 
     def _send_customer_notification(self, subject, message):
         """Send an email notification to the customer when the booking status changes."""
@@ -185,6 +257,18 @@ class BeautyBooking(models.Model):
             })
             try:
                 mail.send()
+            except Exception:
+                pass
+
+            # Direct dispatch to Mailtrap Sandbox via smtplib
+            try:
+                send_mailtrap_email(
+                    sender=email_from,
+                    receiver=f"{record.customer_name} <{record.customer_email}>",
+                    subject=subject,
+                    message_text=f"{subject}\nReference: {record.name}\n\n{message}",
+                    message_html=body_html,
+                )
             except Exception:
                 pass
 

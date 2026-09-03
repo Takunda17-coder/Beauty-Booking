@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Payment Tree View -->
+    <record id="view_beauty_payment_tree" model="ir.ui.view">
+        <field name="name">beauty.payment.tree</field>
+        <field name="model">beauty.payment</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'"
+                  decoration-warning="state == 'pending'"
+                  decoration-success="state == 'paid'"
+                  decoration-danger="state in ('failed', 'cancelled')">
+                <field name="name"/>
+                <field name="booking_id"/>
+                <field name="customer_name"/>
+                <field name="customer_phone"/>
+                <field name="professional_id"/>
+                <field name="service_id"/>
+                <field name="amount" widget="monetary" options="{'currency_field': 'currency'}"/>
+                <field name="currency" invisible="1"/>
+                <field name="payment_method"/>
+                <field name="state" widget="badge" 
+                       decoration-success="state == 'paid'"
+                       decoration-warning="state == 'pending'"
+                       decoration-danger="state == 'failed'"/>
+                <field name="payment_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Payment Form View -->
+    <record id="view_beauty_payment_form" model="ir.ui.view">
+        <field name="name">beauty.payment.form</field>
+        <field name="model">beauty.payment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_initiate_payment"
+                            string="Pay via Pesepay"
+                            type="object"
+                            class="oe_highlight"
+                            attrs="{'invisible': [('state', 'in', ('paid', 'cancelled'))]}"/>
+
+                    <button name="action_check_status"
+                            string="Check Status with Pesepay"
+                            type="object"
+                            attrs="{'invisible': [('state', '!=', 'pending')]}"/>
+
+                    <button name="action_simulate_success"
+                            string="⚡ Sandbox: Simulate EcoCash Paid"
+                            type="object"
+                            class="btn-success"
+                            attrs="{'invisible': [('state', '==', 'paid')]}"/>
+
+                    <button name="action_simulate_failure"
+                            string="Sandbox: Simulate Failed"
+                            type="object"
+                            attrs="{'invisible': [('state', '!=', 'pending')]}"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,pending,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Booking Details">
+                            <field name="booking_id"/>
+                            <field name="professional_id"/>
+                            <field name="service_id"/>
+                            <field name="payment_date"/>
+                        </group>
+                        <group string="Customer Information">
+                            <field name="customer_name"/>
+                            <field name="customer_phone"/>
+                            <field name="customer_email"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Transaction Amount">
+                            <field name="amount"/>
+                            <field name="currency"/>
+                            <field name="payment_method"/>
+                        </group>
+                        <group string="Pesepay Gateway Telemetry">
+                            <field name="pesepay_reference"/>
+                            <field name="redirect_url" widget="url"/>
+                            <field name="poll_url" widget="url"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Gateway Communication &amp; Logs">
+                            <field name="response_message" placeholder="Gateway response messages, webhook payloads, and sandbox notes will be recorded here..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Payment Search View -->
+    <record id="view_beauty_payment_search" model="ir.ui.view">
+        <field name="name">beauty.payment.search</field>
+        <field name="model">beauty.payment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="booking_id"/>
+                <field name="customer_name"/>
+                <field name="customer_phone"/>
+                <field name="pesepay_reference"/>
+
+                <filter string="Pending" name="filter_pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Paid" name="filter_paid" domain="[('state', '=', 'paid')]"/>
+                <filter string="Failed" name="filter_failed" domain="[('state', '=', 'failed')]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Payment Method" name="group_method" context="{'group_by': 'payment_method'}"/>
+                    <filter string="Professional" name="group_professional" context="{'group_by': 'professional_id'}"/>
+                    <filter string="Payment Date" name="group_date" context="{'group_by': 'payment_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action for Payments -->
+    <record id="action_beauty_payment" model="ir.actions.act_window">
+        <field name="name">Payments</field>
+        <field name="res_model">beauty.payment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_beauty_payment_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Pesepay payments recorded yet.
+            </p>
+            <p>
+                Payments will be automatically created when customers book appointments online via Pesepay.
+            </p>
+        </field>
+    </record>
+
+</odoo>

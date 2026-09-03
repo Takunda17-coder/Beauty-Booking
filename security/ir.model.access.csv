@@ -7,3 +7,5 @@ access_beauty_booking_user,beauty.booking.user,model_beauty_booking,beauty_booki
 access_beauty_booking_manager,beauty.booking.manager,model_beauty_booking,beauty_booking.group_beauty_manager,1,1,1,1
 access_beauty_availability_user,beauty.availability.user,model_beauty_availability,beauty_booking.group_beauty_user,1,1,1,0
 access_beauty_availability_manager,beauty.availability.manager,model_beauty_availability,beauty_booking.group_beauty_manager,1,1,1,1
+access_beauty_payment_user,beauty.payment.user,model_beauty_payment,beauty_booking.group_beauty_user,1,1,1,0
+access_beauty_payment_manager,beauty.payment.manager,model_beauty_payment,beauty_booking.group_beauty_manager,1,1,1,1

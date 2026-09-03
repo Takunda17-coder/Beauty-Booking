@@ -57,4 +57,13 @@
         sequence="20"
     />
 
+    <!-- Payments -->
+    <menuitem
+        id="menu_beauty_payments"
+        name="Payments"
+        parent="menu_beauty_root"
+        action="action_beauty_payment"
+        sequence="25"
+    />
+
 </odoo>

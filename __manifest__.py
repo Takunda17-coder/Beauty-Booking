@@ -41,6 +41,7 @@
         'views/booking_search.xml',
         'views/booking_reports.xml',
         'views/service_views.xml',
+        'views/payment_views.xml',
         'web_views/booking_templates.xml',
         'web_views/portal_templates.xml',
         'web_views/auth_templates.xml',
