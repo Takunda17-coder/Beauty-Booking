@@ -13,7 +13,7 @@ serve(async (req) => {
     );
 
     const body = await req.json();
-    const encryptionKey = Deno.env.get("PESEPAY_ENCRYPTION_KEY") || "";
+    const encryptionKey = Deno.env.get("PESEPAY_ENCRYPTION_KEY") || "b9b9826ba47447f298fc0f565ff89907";
     const cryptoHelper = new PesepayCrypto(encryptionKey);
 
     let decrypted = body;

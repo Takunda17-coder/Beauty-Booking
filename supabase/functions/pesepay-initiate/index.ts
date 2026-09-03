@@ -75,8 +75,8 @@ serve(async (req) => {
     const frontendUrl = Deno.env.get("APP_FRONTEND_URL") || "http://localhost:3000";
     const resultUrl = `${frontendUrl}/booking/result?ref=${merchantReference}`;
 
-    const integrationKey = Deno.env.get("PESEPAY_INTEGRATION_KEY") || "";
-    const encryptionKey = Deno.env.get("PESEPAY_ENCRYPTION_KEY") || "";
+    const integrationKey = Deno.env.get("PESEPAY_INTEGRATION_KEY") || "4ef545a6-5260-40d5-ba80-93c5bdc7ea31";
+    const encryptionKey = Deno.env.get("PESEPAY_ENCRYPTION_KEY") || "b9b9826ba47447f298fc0f565ff89907";
     const pesepayBaseUrl = Deno.env.get("PESEPAY_BASE_URL") || "https://api.pesepay.com";
 
     const cryptoHelper = new PesepayCrypto(encryptionKey);

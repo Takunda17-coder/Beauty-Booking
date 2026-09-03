@@ -20,8 +20,8 @@ PESEPAY_MAKE_PAYMENT_PATH = "/api/payments-engine/v2/payments/make-payment"
 PESEPAY_CHECK_PAYMENT_PATH = "/api/payments-engine/v1/payments/check-payment"
 
 # Sandbox Default Credentials (can be overridden via ir.config_parameter)
-DEFAULT_INTEGRATION_KEY = "sandbox_integration_key_beauty_booking_123"
-DEFAULT_ENCRYPTION_KEY = "12345678901234567890123456789012"  # Must be 32 characters
+DEFAULT_INTEGRATION_KEY = "4ef545a6-5260-40d5-ba80-93c5bdc7ea31"
+DEFAULT_ENCRYPTION_KEY = "b9b9826ba47447f298fc0f565ff89907"  # 32 characters
 
 
 class PesepayClient:
