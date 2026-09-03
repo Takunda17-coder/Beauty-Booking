@@ -1,494 +1,1461 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Dashboard Template -->
-        <template id="portal_dashboard" name="Professional Dashboard">
-            <t t-call="website.layout">
-                <style>
-                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
-                    .portal-wrap { padding: 28px 0 40px; }
-                    .portal-hero { background: linear-gradient(135deg, #1f2937 0%, #7c3aed 100%); border-radius: 24px; padding: 28px 24px; color: #fff; box-shadow: 0 18px 40px rgba(124,58,237,0.18); }
-                    .portal-card { background: #fff; border: 1px solid rgba(15,23,42,0.06); border-radius: 18px; box-shadow: 0 10px 24px rgba(15,23,42,0.05); }
-                    .portal-card .card-body { padding: 1.2rem; }
-                    .stat-number { font-size: 2rem; font-weight: 700; color: #1f2937; }
-                    .action-btn { border-radius: 14px; padding: 0.9rem 1rem; font-weight: 600; }
-                    .table thead th { background: #f8fafc; color: #475569; }
-                </style>
-                <div class="container portal-wrap">
-                    <div class="portal-hero mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-lg-8">
-                                <h1 class="mb-1" style="color: #fff;">Welcome, <t t-esc="professional.name"/></h1>
-                                <p class="mb-0 text-white-50">Professional Portal</p>
-                            </div>
-                            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                                <a href="/beauty/profile" class="btn btn-light text-dark action-btn">
-                                    <i class="fa fa-user"/> Edit Profile
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-8">
-                            <h1>Welcome, <t t-esc="professional.name"/></h1>
-                            <p class="text-muted">Professional Portal</p>
-                        </div>
-                        <div class="col-lg-4 text-end">
-                            <a href="/beauty/profile" class="btn btn-primary">
-                                <i class="fa fa-user"/> Edit Profile
-                            </a>
-                        </div>
-                    </div>
+        <!-- Common Minimalist Theme & Navbar Header Snippet -->
+        <template id="portal_nav" name="Portal Navigation">
+            <nav class="site-nav">
+                <div class="container d-flex justify-content-between align-items-center">
+                    <a href="/beauty/dashboard" class="brand">
+                        <div class="brand-icon-box"><i class="fa fa-cut"/></div>
+                        <span>Beauty Booking</span>
+                    </a>
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="/beauty/dashboard" t-att-class="'nav-link-item ' + ('active' if active_page == 'dashboard' else '')">Dashboard</a>
+                        <a href="/beauty/bookings" t-att-class="'nav-link-item ' + ('active' if active_page == 'bookings' else '')">Bookings</a>
+                        <a href="/beauty/services" t-att-class="'nav-link-item ' + ('active' if active_page == 'services' else '')">Services</a>
+                        <a href="/beauty/availability" t-att-class="'nav-link-item ' + ('active' if active_page == 'availability' else '')">Schedule</a>
+                        <a href="/beauty/profile" t-att-class="'nav-link-item ' + ('active' if active_page == 'profile' else '')">Profile</a>
+                        <a href="/beauty/email_sandbox" t-att-class="'nav-link-item ' + ('active' if active_page == 'sandbox' else '')">Email Sandbox</a>
+                        
+                        <!-- Dark Mode Toggle Button -->
+                        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                            <i id="themeToggleIcon" class="fa fa-moon-o"/>
+                        </button>
 
-                    <!-- Statistics -->
-                    <div class="row mt-4">
-                        <div class="col-md-3">
-                            <div class="card portal-card">
-                                <div class="card-body">
-                                    <h5 class="card-title text-muted">Total Bookings</h5>
-                                    <p class="card-text stat-number"><t t-esc="total_bookings"/></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card portal-card">
-                                <div class="card-body">
-                                    <h5 class="card-title text-muted">Completed</h5>
-                                    <p class="card-text stat-number"><t t-esc="completed_bookings"/></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card portal-card">
-                                <div class="card-body">
-                                    <h5 class="card-title text-muted">Services</h5>
-                                    <p class="card-text stat-number"><t t-esc="len(professional.service_ids)"/></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card portal-card">
-                                <div class="card-body">
-                                    <h5 class="card-title text-muted">Verified</h5>
-                                    <p class="card-text">
-                                        <span t-if="professional.verified" class="badge bg-success">Yes</span>
-                                        <span t-else="" class="badge bg-secondary">No</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Today's Bookings -->
-                    <div class="card portal-card mt-4">
-                        <div class="card-header bg-white border-0 pt-3 px-3">
-                            <h5 class="mb-0">Today's Bookings</h5>
-                        </div>
-                        <div class="card-body">
-                            <t t-if="today_bookings">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Time</th>
-                                            <th>Customer</th>
-                                            <th>Service</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr t-foreach="today_bookings" t-as="booking">
-                                            <td><t t-esc="booking.appointment_date.strftime('%H:%M')"/></td>
-                                            <td><t t-esc="booking.customer_name"/></td>
-                                            <td><t t-esc="booking.service_id.name"/></td>
-                                            <td>
-                                                <span t-if="booking.state == 'draft'" class="badge bg-warning">Draft</span>
-                                                <span t-elif="booking.state == 'confirmed'" class="badge bg-info">Confirmed</span>
-                                                <span t-elif="booking.state == 'completed'" class="badge bg-success">Completed</span>
-                                                <span t-elif="booking.state == 'cancelled'" class="badge bg-danger">Cancelled</span>
-                                            </td>
-                                            <td>
-                                                <a t-href="'/beauty/bookings'" class="btn btn-sm btn-outline-primary">View</a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </t>
-                            <t t-else="">
-                                <p class="text-muted">No bookings for today.</p>
-                            </t>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="card portal-card mt-4">
-                        <div class="card-header bg-white border-0 pt-3 px-3">
-                            <h5 class="mb-0">Quick Actions</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <a href="/beauty/bookings" class="btn btn-outline-primary w-100 action-btn">
-                                        <i class="fa fa-calendar"/> Manage Bookings
-                                    </a>
-                                </div>
-                                <div class="col-md-4">
-                                    <a href="/beauty/availability" class="btn btn-outline-primary w-100 action-btn">
-                                        <i class="fa fa-clock"/> Working Hours
-                                    </a>
-                                </div>
-                                <div class="col-md-4">
-                                    <a href="/beauty/profile" class="btn btn-outline-primary w-100 action-btn">
-                                        <i class="fa fa-user"/> My Profile
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        <a href="/beauty/logout" class="btn-danger-custom-sm">
+                            <i class="fa fa-sign-out me-1"/> Logout
+                        </a>
                     </div>
                 </div>
-            </t>
+            </nav>
+        </template>
+
+        <!-- Dashboard Template (Consistent Buttons & Minimalist Layout) -->
+        <template id="portal_dashboard" name="Professional Dashboard">
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                    <title>Professional Dashboard - Beauty Booking</title>
+                    <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+                    <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
+                    <style>
+                        :root, [data-theme="light"] {
+                            --bg-main: #f8fafc;
+                            --bg-card: #ffffff;
+                            --border-color: #e2e8f0;
+                            --text-main: #0f172a;
+                            --text-muted: #64748b;
+                            --accent: #6366f1;
+                            --accent-hover: #4f46e5;
+                            --input-bg: #f8fafc;
+                        }
+                        [data-theme="dark"] {
+                            --bg-main: #0b0f19;
+                            --bg-card: #111827;
+                            --border-color: #1f2937;
+                            --text-main: #f9fafb;
+                            --text-muted: #9ca3af;
+                            --accent: #818cf8;
+                            --accent-hover: #6366f1;
+                            --input-bg: #1f2937;
+                        }
+                        body {
+                            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+                            background-color: var(--bg-main);
+                            color: var(--text-main);
+                            min-height: 100vh;
+                            margin: 0;
+                            transition: background-color 0.3s ease, color 0.3s ease;
+                        }
+                        .site-nav {
+                            background-color: var(--bg-card);
+                            border-bottom: 1px solid var(--border-color);
+                            padding: 0.9rem 0;
+                        }
+                        .site-nav .brand {
+                            font-weight: 800;
+                            font-size: 1.2rem;
+                            color: var(--text-main);
+                            text-decoration: none;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                        .brand-icon-box {
+                            width: 34px;
+                            height: 34px;
+                            background: var(--accent);
+                            border-radius: 10px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: #fff;
+                        }
+                        .nav-link-item {
+                            color: var(--text-muted);
+                            font-size: 0.9rem;
+                            font-weight: 500;
+                            text-decoration: none;
+                        }
+                        .nav-link-item:hover, .nav-link-item.active {
+                            color: var(--accent);
+                            font-weight: 700;
+                        }
+
+                        /* Standardized Button System */
+                        .btn-accent {
+                            background-color: var(--accent);
+                            color: #ffffff !important;
+                            border: none;
+                            border-radius: 999px;
+                            padding: 0 1.4rem;
+                            height: 42px;
+                            font-weight: 700;
+                            font-size: 0.92rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            cursor: pointer;
+                            text-decoration: none;
+                            transition: background-color 0.2s ease;
+                        }
+                        .btn-accent:hover { background-color: var(--accent-hover); color: #ffffff !important; }
+                        
+                        .btn-accent-sm {
+                            background-color: var(--accent);
+                            color: #ffffff !important;
+                            border: none;
+                            border-radius: 999px;
+                            padding: 0 1rem;
+                            height: 34px;
+                            font-weight: 600;
+                            font-size: 0.85rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 6px;
+                            cursor: pointer;
+                            text-decoration: none;
+                        }
+
+                        .btn-outline-accent-sm {
+                            background-color: transparent;
+                            border: 1.5px solid var(--accent);
+                            color: var(--accent) !important;
+                            border-radius: 999px;
+                            padding: 0 1rem;
+                            height: 34px;
+                            font-weight: 600;
+                            font-size: 0.85rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 6px;
+                            cursor: pointer;
+                            text-decoration: none;
+                        }
+                        .btn-outline-accent-sm:hover { background-color: var(--accent); color: #ffffff !important; }
+
+                        .btn-secondary-custom {
+                            background-color: var(--input-bg);
+                            border: 1.5px solid var(--border-color);
+                            color: var(--text-main) !important;
+                            border-radius: 999px;
+                            padding: 0 1.4rem;
+                            height: 42px;
+                            font-weight: 600;
+                            font-size: 0.92rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            cursor: pointer;
+                            text-decoration: none;
+                        }
+
+                        .btn-danger-custom-sm {
+                            background-color: transparent;
+                            border: 1.5px solid #ef4444;
+                            color: #ef4444 !important;
+                            border-radius: 999px;
+                            padding: 0 1rem;
+                            height: 34px;
+                            font-weight: 600;
+                            font-size: 0.85rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 6px;
+                            cursor: pointer;
+                            text-decoration: none;
+                        }
+                        .btn-danger-custom-sm:hover { background-color: #ef4444; color: #ffffff !important; }
+
+                        .btn-success-custom-sm {
+                            background-color: #10b981;
+                            border: none;
+                            color: #ffffff !important;
+                            border-radius: 999px;
+                            padding: 0 1rem;
+                            height: 34px;
+                            font-weight: 600;
+                            font-size: 0.85rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 6px;
+                            cursor: pointer;
+                            text-decoration: none;
+                        }
+
+                        .theme-toggle-btn {
+                            background: transparent;
+                            border: 1.5px solid var(--border-color);
+                            color: var(--text-main);
+                            width: 38px;
+                            height: 38px;
+                            border-radius: 50%;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            cursor: pointer;
+                        }
+
+                        .portal-wrap { padding: 32px 0 50px; }
+                        .hero-card {
+                            background-color: var(--bg-card);
+                            border: 1px solid var(--border-color);
+                            border-radius: 20px;
+                            padding: 28px;
+                            margin-bottom: 24px;
+                        }
+                        .minimal-card {
+                            background-color: var(--bg-card);
+                            border: 1px solid var(--border-color);
+                            border-radius: 18px;
+                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+                        }
+                        .minimal-card .card-body { padding: 1.5rem; }
+                        .stat-val { font-size: 2.2rem; font-weight: 800; color: var(--text-main); }
+                        .action-link {
+                            border: 1px solid var(--border-color);
+                            background-color: var(--input-bg);
+                            color: var(--text-main);
+                            border-radius: 14px;
+                            padding: 1rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            text-align: center;
+                            transition: all 0.2s ease;
+                        }
+                        .action-link:hover {
+                            border-color: var(--accent);
+                            color: var(--accent);
+                        }
+                        /* Minimalist Table */
+                        .table-minimal { width: 100%; margin-bottom: 0; color: var(--text-main); border-collapse: separate; border-spacing: 0; }
+                        .table-minimal th { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); background: transparent; border-bottom: 1px solid var(--border-color); padding: 0.85rem 1rem; }
+                        .table-minimal td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid var(--border-color); color: var(--text-main); background: transparent; }
+                        .table-minimal tr:last-child td { border-bottom: none; }
+                        .table-minimal tbody tr:hover { background-color: var(--input-bg); }
+                    </style>
+                </head>
+                <body>
+                    <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'dashboard'"/></t>
+
+                    <div class="container portal-wrap">
+                        <div class="hero-card">
+                            <div class="row align-items-center">
+                                <div class="col-lg-8">
+                                    <h2 class="fw-bold mb-1" style="color: var(--text-main);">Welcome, <t t-esc="professional.name"/></h2>
+                                    <p class="mb-0" style="color: var(--text-muted);">Manage your bookings, services, and schedule</p>
+                                </div>
+                                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                                    <a href="/beauty/profile" class="btn-accent">
+                                        <i class="fa fa-user me-1"/> Edit Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="card minimal-card">
+                                    <div class="card-body">
+                                        <div class="text-uppercase small fw-bold mb-1" style="color: var(--text-muted);">Total Bookings</div>
+                                        <div class="stat-val"><t t-esc="total_bookings"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card minimal-card">
+                                    <div class="card-body">
+                                        <div class="text-uppercase small fw-bold mb-1" style="color: var(--text-muted);">Completed</div>
+                                        <div class="stat-val text-success"><t t-esc="completed_bookings"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card minimal-card">
+                                    <div class="card-body">
+                                        <div class="text-uppercase small fw-bold mb-1" style="color: var(--text-muted);">Services Offered</div>
+                                        <div class="stat-val text-primary"><t t-esc="len(professional.service_ids)"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card minimal-card">
+                                    <div class="card-body">
+                                        <div class="text-uppercase small fw-bold mb-1" style="color: var(--text-muted);">Account Verification</div>
+                                        <div class="mt-2">
+                                            <span t-if="professional.verified" class="badge bg-success rounded-pill px-3 py-2">Verified Pro</span>
+                                            <span t-else="" class="badge rounded-pill px-3 py-2" style="background: var(--input-bg); color: var(--text-muted); border: 1px solid var(--border-color);">Standard Profile</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Today's Bookings Table -->
+                        <div class="card minimal-card mt-4">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold mb-0" style="color: var(--text-main);">Today's Bookings</h5>
+                            </div>
+                            <div class="card-body px-4">
+                                <t t-if="today_bookings">
+                                    <div class="table-responsive">
+                                        <table class="table-minimal">
+                                            <thead>
+                                                <tr>
+                                                    <th>Time</th>
+                                                    <th>Customer</th>
+                                                    <th>Service</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="today_bookings" t-as="booking">
+                                                    <td class="fw-semibold"><t t-esc="booking.appointment_date.strftime('%H:%M')"/></td>
+                                                    <td><t t-esc="booking.customer_name"/></td>
+                                                    <td><t t-esc="booking.service_id.name"/></td>
+                                                    <td>
+                                                        <span t-if="booking.state == 'draft'" class="badge bg-warning text-dark">Draft</span>
+                                                        <span t-elif="booking.state == 'confirmed'" class="badge bg-info text-dark">Confirmed</span>
+                                                        <span t-elif="booking.state == 'completed'" class="badge bg-success">Completed</span>
+                                                        <span t-elif="booking.state == 'cancelled'" class="badge bg-danger">Cancelled</span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="/beauty/bookings" class="btn-outline-accent-sm">View</a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="mb-0 py-2" style="color: var(--text-muted);">No bookings scheduled for today.</p>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Hub Quick Actions -->
+                        <div class="card minimal-card mt-4">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold mb-0" style="color: var(--text-main);">Management Hub</h5>
+                            </div>
+                            <div class="card-body px-4">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <a href="/beauty/bookings" class="action-link">
+                                            <i class="fa fa-calendar me-1"/> Manage Bookings
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a href="/beauty/services" class="action-link">
+                                            <i class="fa fa-cut me-1"/> Catalogue Services
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a href="/beauty/availability" class="action-link">
+                                            <i class="fa fa-clock-o me-1"/> Schedule Hours
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a href="/beauty/profile" class="action-link">
+                                            <i class="fa fa-user me-1"/> Profile Settings
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function toggleTheme() {
+                            const current = document.documentElement.getAttribute('data-theme') || 'light';
+                            const next = current === 'dark' ? 'light' : 'dark';
+                            document.documentElement.setAttribute('data-theme', next);
+                            localStorage.setItem('beauty_theme', next);
+                            updateThemeIcon(next);
+                        }
+                        function updateThemeIcon(theme) {
+                            const icon = document.getElementById('themeToggleIcon');
+                            if (icon) {
+                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
+                            }
+                        }
+                        (function() {
+                            const saved = localStorage.getItem('beauty_theme') || 'light';
+                            document.documentElement.setAttribute('data-theme', saved);
+                            window.addEventListener('DOMContentLoaded', () => updateThemeIcon(saved));
+                        })();
+                    </script>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                </body>
+            </html>
         </template>
 
         <!-- Profile Edit Template -->
         <template id="portal_profile" name="Professional Profile">
-            <t t-call="website.layout">
-                <style>
-                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
-                    .portal-page { padding: 28px 0 40px; }
-                    .portal-header { background: linear-gradient(135deg, #1f2937 0%, #7c3aed 100%); border-radius: 24px; padding: 24px 22px; color: #fff; box-shadow: 0 18px 40px rgba(124,58,237,0.18); }
-                    .portal-card { background: #fff; border-radius: 18px; border: 1px solid rgba(15,23,42,0.06); box-shadow: 0 14px 30px rgba(15,23,42,0.06); }
-                    .portal-card .card-body { padding: 1.5rem; }
-                    .form-control, .form-select, textarea { border-radius: 14px; border: 1px solid #e5e7eb; padding: 0.8rem 1rem; background: #f9fafb; }
-                    .form-control:focus, .form-select:focus, textarea:focus { border-color: #c084fc; box-shadow: 0 0 0 0.2rem rgba(192, 132, 252, 0.15); background: #fff; }
-                    .btn-portal-primary { background: linear-gradient(135deg, #111827 0%, #7c3aed 100%); border: none; border-radius: 999px; padding: 0.75rem 1.4rem; color: #fff; font-weight: 600; }
-                    .btn-portal-secondary { border-radius: 999px; padding: 0.75rem 1.4rem; font-weight: 600; }
-                    .table thead th { background: #f8fafc; color: #475569; }
-                </style>
-                <div class="container portal-page">
-                    <div class="portal-header mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-lg-8">
-                                <h1 class="mb-1" style="color: #fff;">Edit Profile</h1>
-                                <p class="mb-0 text-white-50">Update your public information</p>
-                            </div>
-                            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                                <a href="/beauty/dashboard" class="btn btn-light text-dark btn-portal-secondary">
-                                    <i class="fa fa-arrow-left"/> Back to Dashboard
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                    <title>Profile Settings - Beauty Booking</title>
+                    <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+                    <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
+                    <style>
+                        :root, [data-theme="light"] {
+                            --bg-main: #f8fafc;
+                            --bg-card: #ffffff;
+                            --border-color: #e2e8f0;
+                            --text-main: #0f172a;
+                            --text-muted: #64748b;
+                            --accent: #6366f1;
+                            --accent-hover: #4f46e5;
+                            --input-bg: #f8fafc;
+                        }
+                        [data-theme="dark"] {
+                            --bg-main: #0b0f19;
+                            --bg-card: #111827;
+                            --border-color: #1f2937;
+                            --text-main: #f9fafb;
+                            --text-muted: #9ca3af;
+                            --accent: #818cf8;
+                            --accent-hover: #6366f1;
+                            --input-bg: #1f2937;
+                        }
+                        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; margin: 0; }
+                        .site-nav { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.9rem 0; }
+                        .site-nav .brand { font-weight: 800; font-size: 1.2rem; color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+                        .brand-icon-box { width: 34px; height: 34px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; }
+                        .nav-link-item { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+                        .nav-link-item:hover, .nav-link-item.active { color: var(--accent); font-weight: 700; }
+                        
+                        .btn-accent { background-color: var(--accent); color: #ffffff !important; border: none; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 700; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-accent:hover { background-color: var(--accent-hover); color: #ffffff !important; }
+                        .btn-secondary-custom { background-color: var(--input-bg); border: 1.5px solid var(--border-color); color: var(--text-main) !important; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 600; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-danger-custom-sm { background-color: transparent; border: 1.5px solid #ef4444; color: #ef4444 !important; border-radius: 999px; padding: 0 1rem; height: 34px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; text-decoration: none; }
+                        .btn-danger-custom-sm:hover { background-color: #ef4444; color: #ffffff !important; }
 
-                    <div class="row">
-                        <div class="col-lg-8 offset-lg-2">
-                            <t t-if="message">
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <t t-esc="message"/>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"/>
+                        .theme-toggle-btn { background: transparent; border: 1.5px solid var(--border-color); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+                        .portal-wrap { padding: 32px 0 50px; }
+                        .minimal-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); }
+                        .form-control, .form-select, textarea { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; padding: 11px 14px; }
+                        .form-control:focus, .form-select:focus, textarea:focus { border-color: var(--accent); background-color: var(--bg-card); color: var(--text-main); }
+                    </style>
+                </head>
+                <body>
+                    <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'profile'"/></t>
+
+                    <div class="container portal-wrap">
+                        <div class="row">
+                            <div class="col-lg-10 offset-lg-1">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <h2 class="fw-bold mb-1" style="color: var(--text-main);">Profile Settings</h2>
+                                        <p class="mb-0" style="color: var(--text-muted);">Manage your public booking handle, biography, and security settings</p>
+                                    </div>
+                                    <a href="/beauty/dashboard" class="btn-secondary-custom">Dashboard</a>
                                 </div>
-                            </t>
-                            <t t-if="error">
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <t t-esc="error"/>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"/>
-                                </div>
-                            </t>
 
-                            <div class="card portal-card">
-                                <div class="card-body">
-                                    <form method="post" class="form">
-                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <t t-if="message">
+                                    <div class="alert alert-success rounded-4 mb-4"><i class="fa fa-check-circle me-1"/> <t t-esc="message"/></div>
+                                </t>
+                                <t t-if="error">
+                                    <div class="alert alert-danger rounded-4 mb-4"><i class="fa fa-exclamation-circle me-1"/> <t t-esc="error"/></div>
+                                </t>
 
-                                        <h5 class="mb-3 text-dark">Basic Information</h5>
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label text-muted">Name</label>
-                                                <input type="text" class="form-control" t-att-value="professional.name" disabled="disabled"/>
+                                <div class="card minimal-card">
+                                    <div class="card-body p-4">
+                                        <form method="post">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                            <h5 class="fw-bold mb-3" style="color: var(--text-main);">Basic Information &amp; Handle</h5>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold" style="color: var(--text-muted);">Full Name</label>
+                                                    <input type="text" class="form-control" t-att-value="professional.name" disabled="disabled"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold" style="color: var(--text-muted);">Professional Type</label>
+                                                    <input type="text" class="form-control" t-att-value="professional.professional_type_display" disabled="disabled"/>
+                                                </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label text-muted">Type</label>
-                                                <input type="text" class="form-control" t-att-value="professional.professional_type_display" disabled="disabled"/>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold" style="color: var(--text-muted);">Public Booking Handle / Username *</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text" style="background: var(--input-bg); border-color: var(--border-color); color: var(--text-muted);">/book/</span>
+                                                        <input type="text" name="username" class="form-control" t-att-value="professional.username" required="required"/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold" style="color: var(--text-muted);">Account Login Email</label>
+                                                    <input type="text" class="form-control" t-att-value="professional.user_id.login if professional.user_id else ''" disabled="disabled"/>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <h5 class="mb-3 text-dark">Contact Information</h5>
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label text-muted">Email</label>
-                                                <input type="email" name="email" class="form-control" t-att-value="professional.email or ''"/>
+                                            <h5 class="fw-bold mt-4 mb-3" style="color: var(--text-main);">Contact &amp; Bio</h5>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold" style="color: var(--text-muted);">Contact Email</label>
+                                                    <input type="email" name="email" class="form-control" t-att-value="professional.email or ''"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold" style="color: var(--text-muted);">Contact Phone</label>
+                                                    <input type="tel" name="phone" class="form-control" t-att-value="professional.phone or ''"/>
+                                                </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label text-muted">Phone</label>
-                                                <input type="tel" name="phone" class="form-control" t-att-value="professional.phone or ''"/>
+
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-semibold" style="color: var(--text-muted);">Location / Shop Address</label>
+                                                <input type="text" name="location" class="form-control" t-att-value="professional.location or ''"/>
                                             </div>
-                                        </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label text-muted">Location</label>
-                                            <input type="text" name="location" class="form-control" placeholder="Your shop location" t-att-value="professional.location or ''"/>
-                                        </div>
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-semibold" style="color: var(--text-muted);">Biography</label>
+                                                <textarea name="bio" class="form-control" rows="4"><t t-esc="professional.bio or ''"/></textarea>
+                                            </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label text-muted">Biography</label>
-                                            <textarea name="bio" class="form-control" rows="5" placeholder="Tell customers about yourself..."><t t-esc="professional.bio or ''"/></textarea>
-                                        </div>
+                                            <!-- Password Change -->
+                                            <div class="border-top pt-4 mt-4" style="border-color: var(--border-color) !important;">
+                                                <h5 class="fw-bold mb-1" style="color: var(--text-main);"><i class="fa fa-lock text-primary me-2"/>Security &amp; Change Password</h5>
+                                                <p class="small mb-3" style="color: var(--text-muted);">Leave empty if you do not wish to update password.</p>
 
-                                        <div class="mb-3">
-                                            <label class="form-label text-muted">Public Booking Link</label>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" t-att-value="professional.booking_url" disabled="disabled"/>
-                                                <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard(this)">
-                                                    <i class="fa fa-copy"/> Copy
+                                                <div class="row mb-3">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label small fw-semibold" style="color: var(--text-muted);">Current Password</label>
+                                                        <input type="password" name="current_password" class="form-control"/>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label small fw-semibold" style="color: var(--text-muted);">New Password</label>
+                                                        <input type="password" name="new_password" class="form-control"/>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label small fw-semibold" style="color: var(--text-muted);">Confirm New Password</label>
+                                                        <input type="password" name="confirm_password" class="form-control"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-4">
+                                                <button type="submit" class="btn-accent">
+                                                    Save Settings
                                                 </button>
                                             </div>
-                                        </div>
-
-                                        <h5 class="mb-3 text-dark">Your Services</h5>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-hover">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Service Name</th>
-                                                        <th>Price</th>
-                                                        <th>Duration</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr t-foreach="professional.service_ids" t-as="service">
-                                                        <td><t t-esc="service.name"/></td>
-                                                        <td>$<t t-esc="'{:.2f}'.format(service.price)"/></td>
-                                                        <td><t t-esc="service.duration"/> min</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <p class="text-muted small mb-4">Services are managed in the admin panel.</p>
-
-                                        <div class="mt-4 d-flex gap-2 flex-wrap">
-                                            <button type="submit" class="btn btn-portal-primary">
-                                                <i class="fa fa-save"/> Save Changes
-                                            </button>
-                                            <a href="/beauty/dashboard" class="btn btn-outline-secondary btn-portal-secondary">Cancel</a>
-                                        </div>
-                                    </form>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <script>
-                    function copyToClipboard(button) {
-                        const link = button.previousElementSibling.value;
-                        navigator.clipboard.writeText(link).then(() => {
-                            button.textContent = '✓ Copied!';
-                            setTimeout(() => {
-                                button.innerHTML = '<i class="fa fa-copy"/> Copy';
-                            }, 2000);
-                        });
-                    }
-                </script>
-            </t>
+                    <script>
+                        function toggleTheme() {
+                            const current = document.documentElement.getAttribute('data-theme') || 'light';
+                            const next = current === 'dark' ? 'light' : 'dark';
+                            document.documentElement.setAttribute('data-theme', next);
+                            localStorage.setItem('beauty_theme', next);
+                            updateThemeIcon(next);
+                        }
+                        function updateThemeIcon(theme) {
+                            const icon = document.getElementById('themeToggleIcon');
+                            if (icon) {
+                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
+                            }
+                        }
+                        (function() {
+                            const saved = localStorage.getItem('beauty_theme') || 'light';
+                            document.documentElement.setAttribute('data-theme', saved);
+                            window.addEventListener('DOMContentLoaded', () => updateThemeIcon(saved));
+                        })();
+                    </script>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                </body>
+            </html>
         </template>
 
         <!-- Bookings Management Template -->
         <template id="portal_bookings" name="Manage Bookings">
-            <t t-call="website.layout">
-                <style>
-                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
-                    .portal-page { padding: 28px 0 40px; }
-                    .portal-header { background: linear-gradient(135deg, #1f2937 0%, #7c3aed 100%); border-radius: 24px; padding: 24px 22px; color: #fff; box-shadow: 0 18px 40px rgba(124,58,237,0.18); }
-                    .portal-card { background: #fff; border-radius: 18px; border: 1px solid rgba(15,23,42,0.06); box-shadow: 0 14px 30px rgba(15,23,42,0.06); }
-                    .portal-card .card-header { background: #fff; border-bottom: 1px solid rgba(15,23,42,0.06); }
-                    .portal-card .card-body { padding: 1.25rem; }
-                    .btn-portal-primary { background: linear-gradient(135deg, #111827 0%, #7c3aed 100%); border: none; border-radius: 999px; padding: 0.75rem 1.4rem; color: #fff; font-weight: 600; }
-                    .btn-portal-secondary { border-radius: 999px; padding: 0.75rem 1.4rem; font-weight: 600; }
-                    .booking-card { min-height: 100%; }
-                    .table thead th { background: #f8fafc; color: #475569; }
-                </style>
-                <div class="container portal-page">
-                    <div class="portal-header mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-lg-8">
-                                <h1 class="mb-1" style="color: #fff;">Manage Bookings</h1>
-                                <p class="mb-0 text-white-50">Review, confirm and complete appointments</p>
-                            </div>
-                            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                                <a href="/beauty/dashboard" class="btn btn-light text-dark btn-portal-secondary">
-                                    <i class="fa fa-arrow-left"/> Back to Dashboard
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                    <title>Manage Bookings - Beauty Booking</title>
+                    <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+                    <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
+                    <style>
+                        :root, [data-theme="light"] {
+                            --bg-main: #f8fafc;
+                            --bg-card: #ffffff;
+                            --border-color: #e2e8f0;
+                            --text-main: #0f172a;
+                            --text-muted: #64748b;
+                            --accent: #6366f1;
+                            --accent-hover: #4f46e5;
+                            --input-bg: #f8fafc;
+                        }
+                        [data-theme="dark"] {
+                            --bg-main: #0b0f19;
+                            --bg-card: #111827;
+                            --border-color: #1f2937;
+                            --text-main: #f9fafb;
+                            --text-muted: #9ca3af;
+                            --accent: #818cf8;
+                            --accent-hover: #6366f1;
+                            --input-bg: #1f2937;
+                        }
+                        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; margin: 0; }
+                        .site-nav { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.9rem 0; }
+                        .site-nav .brand { font-weight: 800; font-size: 1.2rem; color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+                        .brand-icon-box { width: 34px; height: 34px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; }
+                        .nav-link-item { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+                        .nav-link-item:hover, .nav-link-item.active { color: var(--accent); font-weight: 700; }
+                        
+                        .btn-accent { background-color: var(--accent); color: #ffffff !important; border: none; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 700; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-secondary-custom { background-color: var(--input-bg); border: 1.5px solid var(--border-color); color: var(--text-main) !important; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 600; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-success-custom-sm { background-color: #10b981; border: none; color: #ffffff !important; border-radius: 999px; padding: 0 1rem; height: 34px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; text-decoration: none; }
+                        .btn-danger-custom-sm { background-color: transparent; border: 1.5px solid #ef4444; color: #ef4444 !important; border-radius: 999px; padding: 0 1rem; height: 34px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; text-decoration: none; }
+                        .btn-danger-custom-sm:hover { background-color: #ef4444; color: #ffffff !important; }
 
-                    <div class="mb-4">
-                        <div class="btn-group" role="group">
-                            <a href="/beauty/bookings" class="btn btn-outline-primary btn-portal-secondary">All</a>
-                            <a href="/beauty/bookings?state=draft" class="btn btn-outline-warning btn-portal-secondary">Draft</a>
-                            <a href="/beauty/bookings?state=confirmed" class="btn btn-outline-info btn-portal-secondary">Confirmed</a>
-                            <a href="/beauty/bookings?state=completed" class="btn btn-outline-success btn-portal-secondary">Completed</a>
-                        </div>
-                    </div>
+                        .theme-toggle-btn { background: transparent; border: 1.5px solid var(--border-color); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+                        .portal-wrap { padding: 32px 0 50px; }
+                        .minimal-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); }
+                        .form-control, .form-select { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; padding: 11px 14px; }
+                    </style>
+                </head>
+                <body>
+                    <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'bookings'"/></t>
 
-                    <t t-if="bookings">
-                        <div class="row">
-                            <t t-foreach="bookings" t-as="booking">
-                                <div class="col-md-6 mb-3">
-                                    <div class="card portal-card booking-card">
-                                        <div class="card-header">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <h5 class="mb-0"><t t-esc="booking.name"/></h5>
-                                                    <small class="text-muted"><t t-esc="booking.customer_name"/></small>
-                                                </div>
-                                                <span t-if="booking.state == 'draft'" class="badge bg-warning">Draft</span>
-                                                <span t-elif="booking.state == 'confirmed'" class="badge bg-info">Confirmed</span>
-                                                <span t-elif="booking.state == 'completed'" class="badge bg-success">Completed</span>
-                                                <span t-elif="booking.state == 'cancelled'" class="badge bg-danger">Cancelled</span>
-                                                <span t-elif="booking.state == 'no_show'" class="badge bg-secondary">No Show</span>
-                                            </div>
+                    <div class="container portal-wrap">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h2 class="fw-bold mb-1" style="color: var(--text-main);">Manage Bookings</h2>
+                                <p class="mb-0" style="color: var(--text-muted);">Review customer appointments or create manual walk-in bookings</p>
+                            </div>
+                            <a href="/beauty/dashboard" class="btn-secondary-custom">Dashboard</a>
+                        </div>
+
+                        <t t-if="message">
+                            <div class="alert alert-success rounded-4 mb-4"><i class="fa fa-check-circle me-1"/> <t t-esc="message"/></div>
+                        </t>
+                        <t t-if="error">
+                            <div class="alert alert-danger rounded-4 mb-4"><i class="fa fa-exclamation-circle me-1"/> <t t-esc="error"/></div>
+                        </t>
+
+                        <!-- Create Booking Form -->
+                        <div class="card minimal-card mb-4">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold mb-0" style="color: var(--text-main);"><i class="fa fa-plus-circle text-primary me-2"/>Add Walk-in / Phone Booking</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <form method="post" action="/beauty/booking/create">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Customer Name *</label>
+                                            <input type="text" name="customer_name" class="form-control" required="required"/>
                                         </div>
-                                        <div class="card-body">
-                                            <p class="mb-2"><strong>Service:</strong> <t t-esc="booking.service_id.name"/></p>
-                                            <p class="mb-2"><strong>Date &amp; Time:</strong> <t t-esc="booking.appointment_date.strftime('%Y-%m-%d %H:%M')"/></p>
-                                            <p class="mb-2"><strong>Duration:</strong> <t t-esc="booking.duration"/> minutes</p>
-                                            <p class="mb-2"><strong>Price:</strong> $<t t-esc="'{:.2f}'.format(booking.price)"/></p>
-                                            <t t-if="booking.customer_phone">
-                                                <p class="mb-2"><strong>Phone:</strong> <t t-esc="booking.customer_phone"/></p>
-                                            </t>
-                                            <t t-if="booking.notes">
-                                                <p class="mb-2"><strong>Notes:</strong><br/><em><t t-esc="booking.notes"/></em></p>
-                                            </t>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Phone Number *</label>
+                                            <input type="tel" name="customer_phone" class="form-control" required="required"/>
                                         </div>
-                                        <div class="card-footer bg-white border-0 pt-0">
-                                            <form method="post" class="d-flex gap-2" style="flex-wrap: wrap;">
-                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                                <t t-if="booking.state == 'draft'">
-                                                    <button type="submit" t-att-formaction="'/beauty/booking/' + str(booking.id) + '/confirm'" class="btn btn-sm btn-success" onclick="return confirm('Confirm this booking?');">
-                                                        <i class="fa fa-check"/> Confirm
-                                                    </button>
-                                                </t>
-                                                <t t-if="booking.state == 'confirmed'">
-                                                    <button type="submit" t-att-formaction="'/beauty/booking/' + str(booking.id) + '/complete'" class="btn btn-sm btn-success" onclick="return confirm('Mark as completed?');">
-                                                        <i class="fa fa-check-double"/> Complete
-                                                    </button>
-                                                </t>
-                                                <t t-if="booking.state in ('draft', 'confirmed')">
-                                                    <button type="submit" t-att-formaction="'/beauty/booking/' + str(booking.id) + '/cancel'" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this booking?');">
-                                                        <i class="fa fa-times"/> Cancel
-                                                    </button>
-                                                </t>
-                                            </form>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Email Address</label>
+                                            <input type="email" name="customer_email" class="form-control"/>
                                         </div>
                                     </div>
-                                </div>
-                            </t>
+                                    <div class="row g-3 mt-1">
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Service *</label>
+                                            <select name="service_id" class="form-select" required="required">
+                                                <option value="">-- Choose Service --</option>
+                                                <option t-foreach="services" t-as="svc" t-att-value="svc.id">
+                                                    <t t-esc="svc.name"/> ($<t t-esc="'{:.2f}'.format(svc.price)"/> - <t t-esc="svc.duration"/> min)
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Date &amp; Time *</label>
+                                            <input type="datetime-local" name="appointment_date" class="form-control" t-att-min="today" required="required"/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Initial State</label>
+                                            <select name="auto_confirm" class="form-select">
+                                                <option value="1">Confirmed</option>
+                                                <option value="0">Draft</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-end">
+                                        <button type="submit" class="btn-accent">
+                                            Create Booking
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </t>
-                    <t t-else="">
-                        <div class="alert alert-info rounded-4 border-0 shadow-sm">
-                            <i class="fa fa-info-circle"/> No bookings found.
-                        </div>
-                    </t>
-                </div>
-            </t>
+
+                        <!-- Bookings Grid -->
+                        <t t-if="bookings">
+                            <div class="row g-3">
+                                <t t-foreach="bookings" t-as="booking">
+                                    <div class="col-md-6">
+                                        <div class="card minimal-card h-100">
+                                            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                                <div>
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h5 class="fw-bold mb-0" style="color: var(--text-main);"><t t-esc="booking.name"/></h5>
+                                                        <span t-if="booking.state == 'draft'" class="badge bg-warning text-dark">Draft</span>
+                                                        <span t-elif="booking.state == 'confirmed'" class="badge bg-info text-dark">Confirmed</span>
+                                                        <span t-elif="booking.state == 'completed'" class="badge bg-success">Completed</span>
+                                                        <span t-elif="booking.state == 'cancelled'" class="badge bg-danger">Cancelled</span>
+                                                    </div>
+                                                    <p class="mb-1" style="color: var(--text-muted);">Customer: <strong><t t-esc="booking.customer_name"/></strong></p>
+                                                    <p class="mb-1" style="color: var(--text-muted);">Service: <t t-esc="booking.service_id.name"/></p>
+                                                    <p class="mb-1" style="color: var(--text-muted);">Date: <t t-esc="booking.appointment_date.strftime('%Y-%m-%d %H:%M')"/></p>
+                                                    <p class="mb-1" style="color: var(--text-muted);">Price: <strong>$<t t-esc="'{:.2f}'.format(booking.price)"/></strong></p>
+                                                </div>
+
+                                                <div class="mt-3 pt-3 border-top d-flex gap-2" style="border-color: var(--border-color) !important;">
+                                                    <form method="post" class="d-flex gap-2">
+                                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                        <t t-if="booking.state == 'draft'">
+                                                            <button type="submit" t-att-formaction="'/beauty/booking/' + str(booking.id) + '/confirm'" class="btn-success-custom-sm">Confirm</button>
+                                                        </t>
+                                                        <t t-if="booking.state == 'confirmed'">
+                                                            <button type="submit" t-att-formaction="'/beauty/booking/' + str(booking.id) + '/complete'" class="btn-success-custom-sm">Complete</button>
+                                                        </t>
+                                                        <t t-if="booking.state in ('draft', 'confirmed')">
+                                                            <button type="submit" t-att-formaction="'/beauty/booking/' + str(booking.id) + '/cancel'" class="btn-danger-custom-sm">Cancel</button>
+                                                        </t>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="alert alert-info rounded-4 border-0 p-4">No bookings found.</div>
+                        </t>
+                    </div>
+
+                    <script>
+                        function toggleTheme() {
+                            const current = document.documentElement.getAttribute('data-theme') || 'light';
+                            const next = current === 'dark' ? 'light' : 'dark';
+                            document.documentElement.setAttribute('data-theme', next);
+                            localStorage.setItem('beauty_theme', next);
+                            updateThemeIcon(next);
+                        }
+                        function updateThemeIcon(theme) {
+                            const icon = document.getElementById('themeToggleIcon');
+                            if (icon) {
+                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
+                            }
+                        }
+                        (function() {
+                            const saved = localStorage.getItem('beauty_theme') || 'light';
+                            document.documentElement.setAttribute('data-theme', saved);
+                            window.addEventListener('DOMContentLoaded', () => updateThemeIcon(saved));
+                        })();
+                    </script>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                </body>
+            </html>
         </template>
 
-        <!-- Availability Management Template -->
+        <!-- Services Management Template -->
+        <template id="portal_services" name="Manage Services">
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                    <title>Catalogue Services - Beauty Booking</title>
+                    <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+                    <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
+                    <style>
+                        :root, [data-theme="light"] {
+                            --bg-main: #f8fafc;
+                            --bg-card: #ffffff;
+                            --border-color: #e2e8f0;
+                            --text-main: #0f172a;
+                            --text-muted: #64748b;
+                            --accent: #6366f1;
+                            --accent-hover: #4f46e5;
+                            --input-bg: #f8fafc;
+                        }
+                        [data-theme="dark"] {
+                            --bg-main: #0b0f19;
+                            --bg-card: #111827;
+                            --border-color: #1f2937;
+                            --text-main: #f9fafb;
+                            --text-muted: #9ca3af;
+                            --accent: #818cf8;
+                            --accent-hover: #6366f1;
+                            --input-bg: #1f2937;
+                        }
+                        body {
+                            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+                            background-color: var(--bg-main);
+                            color: var(--text-main);
+                            min-height: 100vh;
+                            margin: 0;
+                        }
+                        .site-nav { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.9rem 0; }
+                        .site-nav .brand { font-weight: 800; font-size: 1.2rem; color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+                        .brand-icon-box { width: 34px; height: 34px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; }
+                        .nav-link-item { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+                        .nav-link-item:hover, .nav-link-item.active { color: var(--accent); font-weight: 700; }
+                        
+                        .btn-accent { background-color: var(--accent); color: #ffffff !important; border: none; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 700; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-outline-accent-sm { background-color: transparent; border: 1.5px solid var(--accent); color: var(--accent) !important; border-radius: 999px; padding: 0 1rem; height: 34px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; text-decoration: none; }
+                        .btn-outline-accent-sm:hover { background-color: var(--accent); color: #ffffff !important; }
+                        .btn-secondary-custom { background-color: var(--input-bg); border: 1.5px solid var(--border-color); color: var(--text-main) !important; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 600; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-danger-custom-sm { background-color: transparent; border: 1.5px solid #ef4444; color: #ef4444 !important; border-radius: 999px; padding: 0 1rem; height: 34px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; text-decoration: none; }
+                        .btn-danger-custom-sm:hover { background-color: #ef4444; color: #ffffff !important; }
+
+                        .theme-toggle-btn { background: transparent; border: 1.5px solid var(--border-color); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+                        .portal-wrap { padding: 32px 0 50px; }
+                        .minimal-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); }
+                        .form-control, .form-select, textarea { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; padding: 11px 14px; }
+                        /* Minimalist Table */
+                        .table-minimal { width: 100%; margin-bottom: 0; color: var(--text-main); border-collapse: separate; border-spacing: 0; }
+                        .table-minimal th { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); background: transparent; border-bottom: 1px solid var(--border-color); padding: 0.85rem 1rem; }
+                        .table-minimal td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid var(--border-color); color: var(--text-main); background: transparent; }
+                        .table-minimal tr:last-child td { border-bottom: none; }
+                        .table-minimal tbody tr:hover { background-color: var(--input-bg); }
+                    </style>
+                </head>
+                <body>
+                    <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'services'"/></t>
+
+                    <div class="container portal-wrap">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h2 class="fw-bold mb-1" style="color: var(--text-main);">Catalogue Services</h2>
+                                <p class="mb-0" style="color: var(--text-muted);">Manage your service pictures, tagged prices, and durations</p>
+                            </div>
+                            <a href="/beauty/dashboard" class="btn-secondary-custom">Dashboard</a>
+                        </div>
+
+                        <t t-if="message">
+                            <div class="alert alert-success rounded-4 mb-4"><i class="fa fa-check-circle me-1"/> <t t-esc="message"/></div>
+                        </t>
+                        <t t-if="error">
+                            <div class="alert alert-danger rounded-4 mb-4"><i class="fa fa-exclamation-circle me-1"/> <t t-esc="error"/></div>
+                        </t>
+
+                        <!-- Add Service Form Card -->
+                        <div class="card minimal-card mb-4">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold mb-0" style="color: var(--text-main);"><i class="fa fa-plus-circle text-primary me-2"/>Add Service &amp; Upload Picture</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <form method="post" action="/beauty/services/add" enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Service Name *</label>
+                                            <input type="text" name="name" class="form-control" placeholder="e.g. Haircut &amp; Beard Trim" required="required"/>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Price ($) *</label>
+                                            <input type="number" step="0.01" min="0" name="price" class="form-control" placeholder="35.00" required="required"/>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Duration (Min) *</label>
+                                            <input type="number" min="5" step="5" name="duration" class="form-control" placeholder="30" required="required"/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Upload Service Picture</label>
+                                            <input type="file" name="image" class="form-control" accept="image/*"/>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label small fw-semibold" style="color: var(--text-muted);">Description</label>
+                                        <textarea name="description" class="form-control" rows="2" placeholder="Brief service details..."/>
+                                    </div>
+                                    <div class="mt-3 text-end">
+                                        <button type="submit" class="btn-accent">
+                                            Add to Catalogue
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Current Services Minimalist Table with Edit Button -->
+                        <div class="card minimal-card">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold mb-0" style="color: var(--text-main);">Current Services Catalogue</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <t t-if="services">
+                                    <div class="table-responsive">
+                                        <table class="table-minimal">
+                                            <thead>
+                                                <tr>
+                                                    <th>Picture</th>
+                                                    <th>Service Name</th>
+                                                    <th>Tagged Price</th>
+                                                    <th>Duration</th>
+                                                    <th>Description</th>
+                                                    <th class="text-end">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="services" t-as="svc">
+                                                    <tr>
+                                                        <td>
+                                                            <img t-att-src="'/beauty/service/' + str(svc.id) + '/image'" style="width: 54px; height: 54px; object-fit: cover; border-radius: 12px; border: 1px solid var(--border-color);"/>
+                                                        </td>
+                                                        <td class="fw-semibold"><t t-esc="svc.name"/></td>
+                                                        <td><span class="badge bg-success rounded-pill px-3 py-2">$<t t-esc="'{:.2f}'.format(svc.price)"/></span></td>
+                                                        <td><t t-esc="svc.duration"/> min</td>
+                                                        <td style="color: var(--text-muted);"><t t-esc="svc.description or '—'"/></td>
+                                                        <td class="text-end">
+                                                            <div class="d-inline-flex gap-2 align-items-center justify-content-end">
+                                                                <button type="button" class="btn-outline-accent-sm" data-bs-toggle="modal" t-att-data-bs-target="'#editServiceModal' + str(svc.id)">
+                                                                    <i class="fa fa-pencil me-1"/> Edit
+                                                                </button>
+                                                                <form method="post" t-att-action="'/beauty/service/' + str(svc.id) + '/delete'" class="d-inline-flex align-items-center m-0 p-0">
+                                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                    <button type="submit" class="btn-danger-custom-sm" onclick="return confirm('Delete this service?');">
+                                                                        <i class="fa fa-trash me-1"/> Delete
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+
+                                                            <!-- Edit Service Modal -->
+                                                            <div class="modal fade text-start" t-att-id="'editServiceModal' + str(svc.id)" tabindex="-1" aria-hidden="true">
+                                                                <div class="modal-dialog modal-dialog-centered">
+                                                                    <div class="modal-content border-0 rounded-4 shadow" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color) !important;">
+                                                                        <div class="modal-header border-0 pb-0">
+                                                                            <h5 class="fw-bold mb-0" style="color: var(--text-main);"><i class="fa fa-edit text-primary me-2"/>Edit Service: <t t-esc="svc.name"/></h5>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                        </div>
+                                                                        <form method="post" t-att-action="'/beauty/service/' + str(svc.id) + '/update'" enctype="multipart/form-data">
+                                                                            <div class="modal-body p-4">
+                                                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                                
+                                                                                <div class="mb-3">
+                                                                                    <label class="form-label small fw-semibold" style="color: var(--text-muted);">Service Name *</label>
+                                                                                    <input type="text" name="name" class="form-control" t-att-value="svc.name" required="required"/>
+                                                                                </div>
+                                                                                <div class="row g-3 mb-3">
+                                                                                    <div class="col-md-6">
+                                                                                        <label class="form-label small fw-semibold" style="color: var(--text-muted);">Price ($) *</label>
+                                                                                        <input type="number" step="0.01" min="0" name="price" class="form-control" t-att-value="svc.price" required="required"/>
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <label class="form-label small fw-semibold" style="color: var(--text-muted);">Duration (Min) *</label>
+                                                                                        <input type="number" min="5" step="5" name="duration" class="form-control" t-att-value="svc.duration" required="required"/>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="mb-3">
+                                                                                    <label class="form-label small fw-semibold" style="color: var(--text-muted);">Update Picture</label>
+                                                                                    <div class="d-flex align-items-center gap-3">
+                                                                                        <img t-att-src="'/beauty/service/' + str(svc.id) + '/image'" style="width: 48px; height: 48px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border-color);"/>
+                                                                                        <input type="file" name="image" class="form-control" accept="image/*"/>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="mb-3">
+                                                                                    <label class="form-label small fw-semibold" style="color: var(--text-muted);">Description</label>
+                                                                                    <textarea name="description" class="form-control" rows="3"><t t-esc="svc.description or ''"/></textarea>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                                                                                <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Cancel</button>
+                                                                                <button type="submit" class="btn-accent">Save Changes</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="mb-0" style="color: var(--text-muted);">No services configured yet.</p>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function toggleTheme() {
+                            const current = document.documentElement.getAttribute('data-theme') || 'light';
+                            const next = current === 'dark' ? 'light' : 'dark';
+                            document.documentElement.setAttribute('data-theme', next);
+                            localStorage.setItem('beauty_theme', next);
+                            updateThemeIcon(next);
+                        }
+                        function updateThemeIcon(theme) {
+                            const icon = document.getElementById('themeToggleIcon');
+                            if (icon) {
+                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
+                            }
+                        }
+                        (function() {
+                            const saved = localStorage.getItem('beauty_theme') || 'light';
+                            document.documentElement.setAttribute('data-theme', saved);
+                            window.addEventListener('DOMContentLoaded', () => updateThemeIcon(saved));
+                        })();
+                    </script>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                </body>
+            </html>
+        </template>
+
+        <!-- Schedule Availability Template -->
         <template id="portal_availability" name="Working Hours">
-            <t t-call="website.layout">
-                <style>
-                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
-                    .portal-page { padding: 28px 0 40px; }
-                    .portal-header { background: linear-gradient(135deg, #1f2937 0%, #7c3aed 100%); border-radius: 24px; padding: 24px 22px; color: #fff; box-shadow: 0 18px 40px rgba(124,58,237,0.18); }
-                    .portal-card { background: #fff; border-radius: 18px; border: 1px solid rgba(15,23,42,0.06); box-shadow: 0 14px 30px rgba(15,23,42,0.06); }
-                    .portal-card .card-body { padding: 1.5rem; }
-                    .btn-portal-secondary { border-radius: 999px; padding: 0.75rem 1.4rem; font-weight: 600; }
-                    .table thead th { background: #f8fafc; color: #475569; }
-                </style>
-                <div class="container portal-page">
-                    <div class="portal-header mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-lg-8">
-                                <h1 class="mb-1" style="color: #fff;">Working Hours</h1>
-                                <p class="mb-0 text-white-50">Schedule when customers can book with you</p>
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                    <title>Working Hours - Beauty Booking</title>
+                    <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+                    <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
+                    <style>
+                        :root, [data-theme="light"] {
+                            --bg-main: #f8fafc;
+                            --bg-card: #ffffff;
+                            --border-color: #e2e8f0;
+                            --text-main: #0f172a;
+                            --text-muted: #64748b;
+                            --accent: #6366f1;
+                            --accent-hover: #4f46e5;
+                            --input-bg: #f8fafc;
+                        }
+                        [data-theme="dark"] {
+                            --bg-main: #0b0f19;
+                            --bg-card: #111827;
+                            --border-color: #1f2937;
+                            --text-main: #f9fafb;
+                            --text-muted: #9ca3af;
+                            --accent: #818cf8;
+                            --accent-hover: #6366f1;
+                            --input-bg: #1f2937;
+                        }
+                        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; margin: 0; }
+                        .site-nav { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.9rem 0; }
+                        .site-nav .brand { font-weight: 800; font-size: 1.2rem; color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+                        .brand-icon-box { width: 34px; height: 34px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; }
+                        .nav-link-item { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+                        .nav-link-item:hover, .nav-link-item.active { color: var(--accent); font-weight: 700; }
+                        
+                        .btn-accent { background-color: var(--accent); color: #ffffff !important; border: none; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 700; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-secondary-custom { background-color: var(--input-bg); border: 1.5px solid var(--border-color); color: var(--text-main) !important; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 600; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-danger-custom-sm { background-color: transparent; border: 1.5px solid #ef4444; color: #ef4444 !important; border-radius: 999px; padding: 0 1rem; height: 34px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; text-decoration: none; }
+                        .btn-danger-custom-sm:hover { background-color: #ef4444; color: #ffffff !important; }
+
+                        .theme-toggle-btn { background: transparent; border: 1.5px solid var(--border-color); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+                        .portal-wrap { padding: 32px 0 50px; }
+                        .minimal-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); }
+                        .form-control, .form-select { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; padding: 11px 14px; }
+                        /* Minimalist Table */
+                        .table-minimal { width: 100%; margin-bottom: 0; color: var(--text-main); border-collapse: separate; border-spacing: 0; }
+                        .table-minimal th { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); background: transparent; border-bottom: 1px solid var(--border-color); padding: 0.85rem 1rem; }
+                        .table-minimal td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid var(--border-color); color: var(--text-main); background: transparent; }
+                        .table-minimal tr:last-child td { border-bottom: none; }
+                        .table-minimal tbody tr:hover { background-color: var(--input-bg); }
+                    </style>
+                </head>
+                <body>
+                    <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'availability'"/></t>
+
+                    <div class="container portal-wrap">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h2 class="fw-bold mb-1" style="color: var(--text-main);">Working Hours Schedule</h2>
+                                <p class="mb-0" style="color: var(--text-muted);">Set your available days and appointment hours</p>
                             </div>
-                            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                                <a href="/beauty/dashboard" class="btn btn-light text-dark btn-portal-secondary">
-                                    <i class="fa fa-arrow-left"/> Back to Dashboard
-                                </a>
+                            <a href="/beauty/dashboard" class="btn-secondary-custom">Dashboard</a>
+                        </div>
+
+                        <t t-if="message">
+                            <div class="alert alert-success rounded-4 mb-4"><i class="fa fa-check-circle me-1"/> <t t-esc="message"/></div>
+                        </t>
+                        <t t-if="error">
+                            <div class="alert alert-danger rounded-4 mb-4"><i class="fa fa-exclamation-circle me-1"/> <t t-esc="error"/></div>
+                        </t>
+
+                        <!-- Add Schedule Slot Form -->
+                        <div class="card minimal-card mb-4">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold mb-0" style="color: var(--text-main);"><i class="fa fa-clock-o text-primary me-2"/>Add / Update Schedule Slot</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <form method="post" action="/beauty/availability/add">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Day of Week *</label>
+                                            <select name="day_of_week" class="form-select" required="required">
+                                                <option value="0">Monday</option>
+                                                <option value="1">Tuesday</option>
+                                                <option value="2">Wednesday</option>
+                                                <option value="3">Thursday</option>
+                                                <option value="4">Friday</option>
+                                                <option value="5">Saturday</option>
+                                                <option value="6">Sunday</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Start Time *</label>
+                                            <select name="time_start" class="form-select" required="required">
+                                                <option value="8.0">08:00 AM</option>
+                                                <option value="9.0" selected="selected">09:00 AM</option>
+                                                <option value="10.0">10:00 AM</option>
+                                                <option value="11.0">11:00 AM</option>
+                                                <option value="12.0">12:00 PM</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">End Time *</label>
+                                            <select name="time_end" class="form-select" required="required">
+                                                <option value="16.0">04:00 PM</option>
+                                                <option value="17.0" selected="selected">05:00 PM</option>
+                                                <option value="18.0">06:00 PM</option>
+                                                <option value="19.0">07:00 PM</option>
+                                                <option value="20.0">08:00 PM</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold" style="color: var(--text-muted);">Type</label>
+                                            <select name="is_working_day" class="form-select">
+                                                <option value="1">Working Day</option>
+                                                <option value="0">Day Off</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-end">
+                                        <button type="submit" class="btn-accent">
+                                            Save Slot
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Schedule Minimalist Table -->
+                        <div class="card minimal-card">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold mb-0" style="color: var(--text-main);">Configured Schedule</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <t t-if="availability_ids">
+                                    <div class="table-responsive">
+                                        <table class="table-minimal">
+                                            <thead>
+                                                <tr>
+                                                    <th>Day</th>
+                                                    <th>Status</th>
+                                                    <th>Time Range</th>
+                                                    <th class="text-end">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="availability_ids" t-as="avail">
+                                                    <tr>
+                                                        <td class="fw-semibold">
+                                                            <t t-set="day_names" t-value="{'0': 'Monday', '1': 'Tuesday', '2': 'Wednesday', '3': 'Thursday', '4': 'Friday', '5': 'Saturday', '6': 'Sunday'}"/>
+                                                            <t t-esc="day_names[str(avail.day_of_week)]"/>
+                                                        </td>
+                                                        <td>
+                                                            <span t-if="avail.is_working_day" class="badge bg-success rounded-pill px-3 py-2">Working Day</span>
+                                                            <span t-else="" class="badge bg-secondary rounded-pill px-3 py-2">Day Off</span>
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="avail.is_working_day">
+                                                                <t t-esc="'{:02d}:{:02d} - {:02d}:{:02d}'.format(int(avail.time_start), int((avail.time_start % 1) * 60), int(avail.time_end), int((avail.time_end % 1) * 60))"/>
+                                                            </t>
+                                                            <t t-else="">—</t>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <form method="post" t-att-action="'/beauty/availability/' + str(avail.id) + '/delete'" class="d-inline-flex align-items-center m-0 p-0">
+                                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                <button type="submit" class="btn-danger-custom-sm" onclick="return confirm('Remove slot?');">
+                                                                    <i class="fa fa-trash me-1"/> Remove
+                                                                </button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="mb-0" style="color: var(--text-muted);">No working hours defined.</p>
+                                </t>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card portal-card">
-                        <div class="card-body">
-                            <p class="text-muted mb-4">Your working hours define when customers can book appointments. Availability is displayed here for each day of the week.</p>
+                    <script>
+                        function toggleTheme() {
+                            const current = document.documentElement.getAttribute('data-theme') || 'light';
+                            const next = current === 'dark' ? 'light' : 'dark';
+                            document.documentElement.setAttribute('data-theme', next);
+                            localStorage.setItem('beauty_theme', next);
+                            updateThemeIcon(next);
+                        }
+                        function updateThemeIcon(theme) {
+                            const icon = document.getElementById('themeToggleIcon');
+                            if (icon) {
+                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
+                            }
+                        }
+                        (function() {
+                            const saved = localStorage.getItem('beauty_theme') || 'light';
+                            document.documentElement.setAttribute('data-theme', saved);
+                            window.addEventListener('DOMContentLoaded', () => updateThemeIcon(saved));
+                        })();
+                    </script>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                </body>
+            </html>
+        </template>
 
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>Day</th>
-                                            <th>Status</th>
-                                            <th>Time</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <t t-foreach="availability_ids" t-as="avail">
-                                            <tr>
-                                                <td>
-                                                    <t t-set="day_names" t-value="{'0': 'Monday', '1': 'Tuesday', '2': 'Wednesday', '3': 'Thursday', '4': 'Friday', '5': 'Saturday', '6': 'Sunday'}"/>
-                                                    <t t-esc="day_names[str(avail.day_of_week)]"/>
-                                                </td>
-                                                <td>
-                                                    <span t-if="avail.is_working_day" class="badge bg-success">Working</span>
-                                                    <span t-else="" class="badge bg-secondary">Off</span>
-                                                </td>
-                                                <td>
-                                                    <t t-if="avail.is_working_day">
-                                                        <t t-esc="'{:02d}:{:02d} - {:02d}:{:02d}'.format(int(avail.time_start), int((avail.time_start % 1) * 60), int(avail.time_end), int((avail.time_end % 1) * 60))"/>
-                                                    </t>
-                                                    <t t-else="">—</t>
-                                                </td>
-                                                <td>
-                                                    <small class="text-muted">Edit in admin panel</small>
-                                                </td>
-                                            </tr>
+        <!-- Email Sandbox Template -->
+        <template id="portal_email_sandbox" name="Email Sandbox Inspector">
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                    <title>Email Sandbox - Beauty Booking</title>
+                    <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+                    <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
+                    <style>
+                        :root, [data-theme="light"] {
+                            --bg-main: #f8fafc;
+                            --bg-card: #ffffff;
+                            --border-color: #e2e8f0;
+                            --text-main: #0f172a;
+                            --text-muted: #64748b;
+                            --accent: #6366f1;
+                            --accent-hover: #4f46e5;
+                            --input-bg: #f8fafc;
+                        }
+                        [data-theme="dark"] {
+                            --bg-main: #0b0f19;
+                            --bg-card: #111827;
+                            --border-color: #1f2937;
+                            --text-main: #f9fafb;
+                            --text-muted: #9ca3af;
+                            --accent: #818cf8;
+                            --accent-hover: #6366f1;
+                            --input-bg: #1f2937;
+                        }
+                        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; margin: 0; }
+                        .site-nav { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.9rem 0; }
+                        .site-nav .brand { font-weight: 800; font-size: 1.2rem; color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+                        .brand-icon-box { width: 34px; height: 34px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; }
+                        .nav-link-item { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+                        .nav-link-item:hover, .nav-link-item.active { color: var(--accent); font-weight: 700; }
+                        
+                        .btn-accent { background-color: var(--accent); color: #ffffff !important; border: none; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 700; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-danger-custom-sm { background-color: transparent; border: 1.5px solid #ef4444; color: #ef4444 !important; border-radius: 999px; padding: 0 1rem; height: 34px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; text-decoration: none; }
+
+                        .theme-toggle-btn { background: transparent; border: 1.5px solid var(--border-color); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+                        .portal-wrap { padding: 32px 0 50px; }
+                        .minimal-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); }
+                    </style>
+                </head>
+                <body>
+                    <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'sandbox'"/></t>
+
+                    <div class="container portal-wrap">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                            <div>
+                                <h2 class="fw-bold mb-1" style="color: var(--text-main);">Email Sandbox Inspector</h2>
+                                <p class="mb-0" style="color: var(--text-muted);">Inspect captured booking confirmation emails sent to testing SMTP (localhost:1025)</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <form method="post" action="/beauty/email_sandbox/test" class="d-inline">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <button type="submit" class="btn-accent">
+                                        Send Test Email
+                                    </button>
+                                </form>
+                                <form method="post" action="/beauty/email_sandbox/clear" class="d-inline">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <button type="submit" class="btn-danger-custom-sm" style="height: 42px; padding: 0 1.2rem;">Clear Inbox</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <t t-if="message">
+                            <div class="alert alert-success rounded-4 mb-4"><i class="fa fa-check-circle me-1"/> <t t-esc="message"/></div>
+                        </t>
+
+                        <div class="card minimal-card">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold mb-0" style="color: var(--text-main);">Captured Emails (<t t-esc="len(emails)"/>)</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <t t-if="emails">
+                                    <div class="accordion" id="emailAccordion">
+                                        <t t-foreach="emails" t-as="mail">
+                                            <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
+                                                <h2 class="accordion-header" t-att-id="'head' + str(mail.id)">
+                                                    <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" t-att-data-bs-target="'#col' + str(mail.id)">
+                                                        <div class="w-100 d-flex justify-content-between align-items-center pe-3">
+                                                            <div>
+                                                                <strong style="color: var(--text-main);"><t t-esc="mail.subject"/></strong>
+                                                                <small class="d-block text-muted">To: <t t-esc="mail.email_to"/></small>
+                                                            </div>
+                                                            <span class="badge bg-success rounded-pill px-3 py-2">Captured</span>
+                                                        </div>
+                                                    </button>
+                                                </h2>
+                                                <div t-att-id="'col' + str(mail.id)" class="accordion-collapse collapse" data-bs-parent="#emailAccordion">
+                                                    <div class="accordion-body p-4" style="background: var(--input-bg);">
+                                                        <div class="p-3 bg-white rounded-3 border">
+                                                            <t t-out="mail.body_html"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </t>
-                                    </tbody>
-                                </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="mb-0" style="color: var(--text-muted);">No captured emails in sandbox.</p>
+                                </t>
                             </div>
-                            <p class="text-muted small mt-3 mb-0">
-                                <i class="fa fa-info-circle"/> To update your working hours, please use the admin panel or contact support.
-                            </p>
                         </div>
                     </div>
-                </div>
-            </t>
+
+                    <script>
+                        function toggleTheme() {
+                            const current = document.documentElement.getAttribute('data-theme') || 'light';
+                            const next = current === 'dark' ? 'light' : 'dark';
+                            document.documentElement.setAttribute('data-theme', next);
+                            localStorage.setItem('beauty_theme', next);
+                            updateThemeIcon(next);
+                        }
+                        function updateThemeIcon(theme) {
+                            const icon = document.getElementById('themeToggleIcon');
+                            if (icon) {
+                                icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
+                            }
+                        }
+                        (function() {
+                            const saved = localStorage.getItem('beauty_theme') || 'light';
+                            document.documentElement.setAttribute('data-theme', saved);
+                            window.addEventListener('DOMContentLoaded', () => updateThemeIcon(saved));
+                        })();
+                    </script>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                </body>
+            </html>
         </template>
 
         <!-- Access Denied Template -->
         <template id="portal_access_denied" name="Access Denied">
-            <t t-call="website.layout">
-                <style>
-                    body { background: linear-gradient(135deg, #f9f5ff 0%, #fff7ed 100%); }
-                    .portal-page { padding: 60px 0; }
-                    .access-card { background: #fff; border-radius: 22px; border: 1px solid rgba(220,38,38,0.12); box-shadow: 0 20px 40px rgba(127, 29, 29, 0.08); }
-                    .btn-portal-primary { background: linear-gradient(135deg, #111827 0%, #7c3aed 100%); border: none; border-radius: 999px; padding: 0.75rem 1.4rem; color: #fff; font-weight: 600; }
-                </style>
-                <div class="container portal-page">
-                    <div class="access-card p-4 p-md-5">
-                        <div class="alert alert-danger border-0 mb-0" role="alert" style="background: rgba(254,226,226,0.7); color: #7f1d1d;">
-                            <h4 class="alert-heading mb-3">Access Denied</h4>
-                            <p class="mb-3">You are not registered as a beauty professional. Please contact an administrator.</p>
-                            <hr/>
-                            <a href="/web" class="btn btn-portal-primary">Go to Dashboard</a>
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                    <title>Access Denied - Beauty Booking</title>
+                    <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+                    <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
+                    <style>
+                        :root, [data-theme="light"] {
+                            --bg-main: #f8fafc;
+                            --bg-card: #ffffff;
+                            --border-color: #e2e8f0;
+                            --text-main: #0f172a;
+                            --text-muted: #64748b;
+                            --accent: #6366f1;
+                        }
+                        [data-theme="dark"] {
+                            --bg-main: #0b0f19;
+                            --bg-card: #111827;
+                            --border-color: #1f2937;
+                            --text-main: #f9fafb;
+                            --text-muted: #9ca3af;
+                            --accent: #818cf8;
+                        }
+                        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+                        .access-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; max-width: 500px; width: 100%; padding: 3rem 2.5rem; text-align: center; }
+                        
+                        .btn-accent { background-color: var(--accent); color: #ffffff !important; border: none; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 700; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                        .btn-secondary-custom { background-color: var(--input-bg); border: 1.5px solid var(--border-color); color: var(--text-main) !important; border-radius: 999px; padding: 0 1.4rem; height: 42px; font-weight: 600; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-decoration: none; }
+                    </style>
+                </head>
+                <body>
+                    <div class="access-card">
+                        <div class="text-danger mb-3" style="font-size: 3rem;"><i class="fa fa-lock"/></div>
+                        <h3 class="fw-bold mb-2" style="color: var(--text-main);">Access Restricted</h3>
+                        <p class="mb-4" style="color: var(--text-muted);">You are not registered as a Beauty Professional. Please sign in with a professional account or register below.</p>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="/beauty/login" class="btn-accent">Sign In</a>
+                            <a href="/beauty/register" class="btn-secondary-custom">Register</a>
                         </div>
                     </div>
-                </div>
-            </t>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                </body>
+            </html>
         </template>
     </data>
 </odoo>

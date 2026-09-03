@@ -12,4 +12,82 @@
         <field name="implied_ids" eval="[(4, ref('beauty_booking.group_beauty_user'))]"/>
     </record>
 
+    <!-- Record-Level Security (RLS) Rules -->
+    
+    <!-- Beauty Professional Model Rules -->
+    <record id="rule_beauty_professional_user" model="ir.rule">
+        <field name="name">Beauty Professional: Own Profile Only</field>
+        <field name="model_id" ref="model_beauty_professional"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('beauty_booking.group_beauty_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_beauty_professional_manager" model="ir.rule">
+        <field name="name">Beauty Professional: Manager Full Access</field>
+        <field name="model_id" ref="model_beauty_professional"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('beauty_booking.group_beauty_manager'))]"/>
+    </record>
+
+    <!-- Beauty Service Model Rules -->
+    <record id="rule_beauty_service_user" model="ir.rule">
+        <field name="name">Beauty Service: Own Services Only</field>
+        <field name="model_id" ref="model_beauty_service"/>
+        <field name="domain_force">[('professional_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('beauty_booking.group_beauty_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_beauty_service_manager" model="ir.rule">
+        <field name="name">Beauty Service: Manager Full Access</field>
+        <field name="model_id" ref="model_beauty_service"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('beauty_booking.group_beauty_manager'))]"/>
+    </record>
+
+    <!-- Beauty Booking Model Rules -->
+    <record id="rule_beauty_booking_user" model="ir.rule">
+        <field name="name">Beauty Booking: Own Bookings Only</field>
+        <field name="model_id" ref="model_beauty_booking"/>
+        <field name="domain_force">[('professional_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('beauty_booking.group_beauty_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_beauty_booking_manager" model="ir.rule">
+        <field name="name">Beauty Booking: Manager Full Access</field>
+        <field name="model_id" ref="model_beauty_booking"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('beauty_booking.group_beauty_manager'))]"/>
+    </record>
+
+    <!-- Beauty Availability Model Rules -->
+    <record id="rule_beauty_availability_user" model="ir.rule">
+        <field name="name">Beauty Availability: Own Availability Only</field>
+        <field name="model_id" ref="model_beauty_availability"/>
+        <field name="domain_force">[('professional_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('beauty_booking.group_beauty_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_beauty_availability_manager" model="ir.rule">
+        <field name="name">Beauty Availability: Manager Full Access</field>
+        <field name="model_id" ref="model_beauty_availability"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('beauty_booking.group_beauty_manager'))]"/>
+    </record>
+
 </odoo>

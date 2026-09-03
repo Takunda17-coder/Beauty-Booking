@@ -34,6 +34,11 @@ class BeautyService(models.Model):
         default=30
     )
 
+    image = fields.Binary(
+        string='Service Picture',
+        attachment=True,
+    )
+
     active = fields.Boolean(
         string='Active',
         default=True

@@ -29,6 +29,8 @@
 
     'data': [
         'data/sequence.xml',
+        'data/mail_template_data.xml',
+        'data/mail_server_data.xml',
 
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -40,7 +42,8 @@
         'views/booking_reports.xml',
         'views/service_views.xml',
         'web_views/booking_templates.xml',
-        'web_views/portal_templates.xml'
+        'web_views/portal_templates.xml',
+        'web_views/auth_templates.xml',
     ],
 
     'installable': True,

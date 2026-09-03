@@ -6,298 +6,488 @@
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1"/>
                 <title>Book with <t t-esc="professional.name"/></title>
-                <link rel="stylesheet" href="/web/static/lib/bootstrap/css/bootstrap.css"/>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+                <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+                <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
                 <style>
+                    :root, [data-theme="light"] {
+                        --bg-main: #f8fafc;
+                        --bg-card: #ffffff;
+                        --border-color: #e2e8f0;
+                        --text-main: #0f172a;
+                        --text-muted: #64748b;
+                        --accent: #6366f1;
+                        --accent-hover: #4f46e5;
+                        --input-bg: #f8fafc;
+                        --price-tag: #059669;
+                    }
+                    [data-theme="dark"] {
+                        --bg-main: #0b0f19;
+                        --bg-card: #111827;
+                        --border-color: #1f2937;
+                        --text-main: #f9fafb;
+                        --text-muted: #9ca3af;
+                        --accent: #818cf8;
+                        --accent-hover: #6366f1;
+                        --input-bg: #1f2937;
+                        --price-tag: #10b981;
+                    }
                     body {
-                        background: linear-gradient(135deg, #fdf2eb 0%, #f6f0ff 100%);
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+                        background-color: var(--bg-main);
+                        color: var(--text-main);
                         min-height: 100vh;
+                        margin: 0;
+                        transition: background-color 0.3s ease, color 0.3s ease;
                     }
-                    .booking-container {
-                        padding: 40px 20px;
+                    .site-nav {
+                        background-color: var(--bg-card);
+                        border-bottom: 1px solid var(--border-color);
+                        padding: 0.9rem 0;
                     }
-                    .booking-grid {
-                        display: grid;
-                        grid-template-columns: 1fr 2fr;
-                        gap: 28px;
-                        align-items: start;
+                    .site-nav .brand {
+                        font-weight: 800;
+                        font-size: 1.2rem;
+                        color: var(--text-main);
+                        text-decoration: none;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
                     }
-                    @media (max-width: 768px) {
-                        .booking-grid {
-                            grid-template-columns: 1fr;
-                        }
-                    }
-                    .pro-card {
-                        background: #fff;
-                        border-radius: 20px;
-                        padding: 28px;
-                        box-shadow: 0 16px 40px rgba(31, 41, 55, 0.08);
-                        border: 1px solid rgba(17, 24, 39, 0.05);
-                        text-align: center;
-                        position: sticky;
-                        top: 20px;
-                    }
-                    .pro-avatar {
-                        width: 100px;
-                        height: 100px;
-                        border-radius: 50%;
-                        background: linear-gradient(135deg, #111827 0%, #7c3aed 100%);
+                    .brand-icon-box {
+                        width: 34px;
+                        height: 34px;
+                        background: var(--accent);
+                        border-radius: 10px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        margin: 0 auto 16px;
                         color: #fff;
-                        font-size: 2.5rem;
                     }
-                    .pro-name {
-                        font-size: 1.4rem;
-                        font-weight: 700;
-                        color: #1f2937;
-                        margin-bottom: 8px;
-                    }
-                    .pro-location {
-                        font-size: 0.9rem;
-                        color: #6b7280;
-                        margin-bottom: 20px;
-                    }
-                    .pro-divider {
-                        height: 2px;
-                        background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
-                        margin: 20px 0;
-                    }
-                    .pro-services {
-                        text-align: left;
-                        margin-top: 20px;
-                    }
-                    .service-item {
-                        font-size: 0.85rem;
-                        padding: 8px 0;
-                        color: #4b5563;
-                        border-bottom: 1px solid rgba(15, 23, 42, 0.05);
-                    }
-                    .booking-form {
-                        background: #fff;
-                        border-radius: 20px;
-                        padding: 28px;
-                        box-shadow: 0 16px 40px rgba(31, 41, 55, 0.08);
-                        border: 1px solid rgba(17, 24, 39, 0.05);
-                    }
-                    .form-section {
-                        margin-bottom: 28px;
-                    }
-                    .form-section:last-child {
-                        margin-bottom: 0;
-                    }
-                    .section-title {
-                        font-size: 0.85rem;
-                        text-transform: uppercase;
-                        letter-spacing: 0.08em;
-                        font-weight: 700;
-                        color: #9ca3af;
-                        margin-bottom: 16px;
+                    .theme-toggle-btn {
+                        background: transparent;
+                        border: 1px solid var(--border-color);
+                        color: var(--text-main);
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
                         display: flex;
                         align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
                     }
-                    .section-title i {
-                        margin-right: 8px;
-                        color: #7c3aed;
+                    .theme-toggle-btn:hover {
+                        background: var(--border-color);
                     }
-                    .booking-label {
-                        font-size: 0.8rem;
-                        text-transform: uppercase;
-                        letter-spacing: 0.06em;
-                        font-weight: 600;
-                        color: #6b7280;
-                        margin-bottom: 8px;
-                        display: block;
+                    .booking-wrap {
+                        max-width: 1100px;
+                        margin: 0 auto;
+                        padding: 36px 20px 60px;
                     }
-                    .form-control, .form-select {
-                        border-radius: 12px;
-                        border: 1.5px solid #e5e7eb;
-                        padding: 11px 14px;
-                        background: #f9fafb;
-                        font-size: 0.95rem;
-                        transition: all 0.25s ease;
+                    .pro-header-minimal {
+                        background-color: var(--bg-card);
+                        border: 1px solid var(--border-color);
+                        border-radius: 20px;
+                        padding: 28px;
+                        margin-bottom: 32px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
                     }
-                    .form-control:hover, .form-select:hover {
-                        border-color: #d1d5db;
+                    .pro-avatar {
+                        width: 76px;
+                        height: 76px;
+                        border-radius: 20px;
+                        background: linear-gradient(135deg, var(--accent) 0%, #a855f7 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #fff;
+                        font-size: 2rem;
                     }
-                    .form-control:focus, .form-select:focus {
-                        border-color: #c084fc;
-                        box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.1);
-                        background: #fff;
+                    .section-heading {
+                        font-size: 1.15rem;
+                        font-weight: 700;
+                        color: var(--text-main);
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
                     }
-                    textarea.form-control {
-                        resize: vertical;
-                        min-height: 100px;
-                    }
-                    .form-row {
+                    .catalogue-grid {
                         display: grid;
-                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                        gap: 14px;
+                        grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+                        gap: 24px;
+                        margin-bottom: 40px;
                     }
-                    .btn-book {
-                        background: linear-gradient(135deg, #111827 0%, #7c3aed 100%);
+                    .service-card {
+                        background-color: var(--bg-card);
+                        border: 1.5px solid var(--border-color);
+                        border-radius: 20px;
+                        overflow: hidden;
+                        transition: all 0.25s ease;
+                        display: flex;
+                        flex-direction: column;
+                        position: relative;
+                    }
+                    .service-card.selected {
+                        border-color: var(--accent);
+                        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+                    }
+                    .service-img-wrap {
+                        height: 180px;
+                        width: 100%;
+                        overflow: hidden;
+                        position: relative;
+                        background: var(--border-color);
+                    }
+                    .service-img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                    .price-pill {
+                        position: absolute;
+                        top: 14px;
+                        right: 14px;
+                        background: var(--price-tag);
+                        color: #fff;
+                        font-weight: 700;
+                        font-size: 0.95rem;
+                        padding: 6px 14px;
+                        border-radius: 999px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        z-index: 2;
+                    }
+                    .duration-pill {
+                        position: absolute;
+                        bottom: 14px;
+                        left: 14px;
+                        background: rgba(15, 23, 42, 0.85);
+                        backdrop-filter: blur(4px);
+                        color: #fff;
+                        font-weight: 600;
+                        font-size: 0.8rem;
+                        padding: 5px 12px;
+                        border-radius: 999px;
+                        z-index: 2;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 5px;
+                    }
+                    .select-badge {
+                        position: absolute;
+                        top: 14px;
+                        left: 14px;
+                        background: var(--accent);
+                        color: #fff;
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        display: none;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 2;
+                    }
+                    .service-card.selected .select-badge {
+                        display: flex !important;
+                    }
+                    .service-info {
+                        padding: 22px;
+                        flex-grow: 1;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .service-name {
+                        font-size: 1.1rem;
+                        font-weight: 700;
+                        color: var(--text-main);
+                        margin-bottom: 0;
+                        line-height: 1.4;
+                    }
+                    .duration-badge-inline {
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                        color: var(--text-muted);
+                        background-color: var(--input-bg);
+                        border: 1px solid var(--border-color);
+                        border-radius: 999px;
+                        padding: 4px 10px;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        white-space: nowrap;
+                    }
+                    .service-desc {
+                        font-size: 0.88rem;
+                        color: var(--text-muted);
+                        line-height: 1.5;
+                        margin-bottom: 20px;
+                        flex-grow: 1;
+                    }
+                    .btn-select-action {
+                        background-color: var(--input-bg);
+                        border: 1.5px solid var(--border-color);
+                        color: var(--text-main);
+                        font-weight: 700;
+                        font-size: 0.95rem;
+                        border-radius: 12px;
+                        padding: 10px 16px;
+                        width: 100%;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                    }
+                    .btn-select-action:hover {
+                        border-color: var(--accent);
+                        color: var(--accent);
+                    }
+                    .service-card.selected .btn-select-action {
+                        background-color: var(--accent);
+                        color: #ffffff;
+                        border-color: var(--accent);
+                    }
+                    .form-card {
+                        background-color: var(--bg-card);
+                        border: 1px solid var(--border-color);
+                        border-radius: 20px;
+                        padding: 32px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+                    }
+                    .form-label-custom {
+                        display: block;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        color: var(--text-muted);
+                        margin-bottom: 6px;
+                    }
+                    .form-control, .form-select, textarea {
+                        background-color: var(--input-bg);
+                        border: 1.5px solid var(--border-color);
+                        color: var(--text-main);
+                        border-radius: 12px;
+                        padding: 11px 16px;
+                        font-size: 0.95rem;
+                    }
+                    .form-control:focus, .form-select:focus, textarea:focus {
+                        border-color: var(--accent);
+                        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+                        background-color: var(--bg-card);
+                        color: var(--text-main);
+                    }
+                    .btn-submit-main {
+                        background-color: var(--accent);
+                        color: #ffffff;
                         border: none;
                         border-radius: 999px;
                         padding: 14px 32px;
-                        font-weight: 600;
-                        color: #fff;
+                        font-weight: 700;
                         font-size: 1rem;
-                        box-shadow: 0 12px 28px rgba(124, 58, 237, 0.32);
-                        cursor: pointer;
-                        transition: all 0.3s ease;
                         width: 100%;
+                        cursor: pointer;
+                        transition: background-color 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
                     }
-                    .btn-book:hover {
-                        opacity: 0.94;
-                        box-shadow: 0 14px 36px rgba(124, 58, 237, 0.4);
-                        transform: translateY(-2px);
-                    }
-                    .btn-book:active {
-                        transform: translateY(0);
-                    }
-                    .alert-box {
-                        border-radius: 14px;
-                        border: none;
-                        padding: 16px 20px;
-                        margin-bottom: 24px;
-                        font-size: 0.95rem;
-                    }
-                    .alert-success {
-                        background: rgba(34, 197, 94, 0.08);
-                        color: #166534;
-                        border-left: 4px solid #22c55e;
-                    }
-                    .alert-danger {
-                        background: rgba(239, 68, 68, 0.08);
-                        color: #7f1d1d;
-                        border-left: 4px solid #ef4444;
+                    .btn-submit-main:hover {
+                        background-color: var(--accent-hover);
+                        color: #ffffff;
                     }
                 </style>
             </head>
             <body>
-                <main class="booking-container">
-                    <div class="booking-grid" style="max-width: 1000px; margin: 0 auto;">
-                        <!-- Professional Info Card (Sidebar) -->
-                        <div class="pro-card">
+                <!-- Header Navigation with Dark Mode Toggle -->
+                <nav class="site-nav">
+                    <div class="container d-flex justify-content-between align-items-center">
+                        <a t-att-href="'/beauty/book/' + professional.username" class="brand">
+                            <div class="brand-icon-box"><i class="fa fa-cut"/></div>
+                            <span>Beauty Booking</span>
+                        </a>
+                        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                            <i id="themeToggleIcon" class="fa fa-moon-o"/>
+                        </button>
+                    </div>
+                </nav>
+
+                <main class="booking-wrap">
+                    <!-- Minimalist Professional Header Card -->
+                    <div class="pro-header-minimal">
+                        <div class="d-flex align-items-center gap-4 flex-wrap">
                             <div class="pro-avatar">
-                                <i class="fas fa-scissors"/>
+                                <i class="fa fa-user"/>
                             </div>
-                            <div class="pro-name"><t t-esc="professional.name"/></div>
-                            <t t-if="professional.location">
-                                <div class="pro-location">
-                                    <i class="fas fa-map-marker-alt" style="margin-right: 6px;"/><t t-esc="professional.location"/>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h3 class="fw-bold mb-0" style="color: var(--text-main);"><t t-esc="professional.name"/></h3>
+                                    <span t-if="professional.verified" class="badge bg-success rounded-pill px-3 py-1 small">Verified Pro</span>
+                                    <span class="badge rounded-pill px-3 py-1 small" style="background: var(--input-bg); color: var(--text-muted); border: 1px solid var(--border-color);"><t t-esc="professional.professional_type_display"/></span>
                                 </div>
-                            </t>
-                            <t t-if="professional.bio">
-                                <p style="font-size: 0.9rem; color: #6b7280; margin: 12px 0; line-height: 1.5;">
-                                    <t t-esc="professional.bio"/>
-                                </p>
-                            </t>
-                            <t t-if="professional.service_ids">
-                                <div class="pro-divider"/>
-                                <div class="pro-services">
-                                    <div style="font-size: 0.8rem; font-weight: 700; color: #4b5563; margin-bottom: 12px;">Available Services</div>
-                                    <t t-foreach="professional.service_ids" t-as="svc">
-                                        <div class="service-item">
-                                            <strong><t t-esc="svc.name"/></strong>
-                                            <br/>
-                                            <span style="font-size: 0.75rem; color: #9ca3af;"><t t-esc="svc.duration"/> min • $<t t-esc="'{:.2f}'.format(svc.price)"/></span>
+                                <t t-if="professional.location">
+                                    <p class="small mb-1" style="color: var(--text-muted);"><i class="fa fa-map-marker me-1 text-danger"/><t t-esc="professional.location"/></p>
+                                </t>
+                                <t t-if="professional.bio">
+                                    <p class="small mb-0" style="color: var(--text-muted);"><t t-esc="professional.bio"/></p>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submission Confirmation -->
+                    <t t-if="submitted">
+                        <div class="form-card text-center py-5">
+                            <div class="text-success mb-3" style="font-size: 3.5rem;">
+                                <i class="fa fa-check-circle"/>
+                            </div>
+                            <h3 class="fw-bold mb-2" style="color: var(--text-main);">Appointment Requested!</h3>
+                            <p class="mb-4" style="color: var(--text-muted);">Thank you, <strong><t t-esc="post.get('customer_name')"/></strong>. Reference <strong><t t-esc="new_booking.name if new_booking else 'BKG'"/></strong> has been submitted.</p>
+                            <div>
+                                <a t-att-href="'/beauty/book/' + professional.username" class="btn btn-submit-main d-inline-block" style="width: auto;">Book Another Service</a>
+                            </div>
+                        </div>
+                    </t>
+
+                    <t t-if="not submitted">
+                        <t t-if="error">
+                            <div class="alert alert-danger rounded-4 p-4 mb-4" role="alert">
+                                <i class="fa fa-exclamation-circle me-2"/> <t t-esc="error"/>
+                            </div>
+                        </t>
+
+                        <form method="post" id="bookingForm">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="service_id" id="service_id_input" t-att-value="post.get('service_id', '')" required="required"/>
+
+                            <!-- Section 1: Visual Service Catalogue -->
+                            <div class="section-heading">
+                                <i class="fa fa-th-large text-primary"/>
+                                <span>1. Select Service</span>
+                            </div>
+
+                            <t t-if="services">
+                                <div class="catalogue-grid">
+                                    <t t-foreach="services" t-as="svc">
+                                        <div t-att-class="'service-card ' + ('selected' if str(svc.id) == post.get('service_id') else '')"
+                                             t-att-id="'svc-card-' + str(svc.id)">
+                                            
+                                            <!-- Image Wrapper with Anchored Badges -->
+                                            <div class="service-img-wrap">
+                                                <div class="select-badge"><i class="fa fa-check"/></div>
+                                                <div class="price-pill">$<t t-esc="'{:.2f}'.format(svc.price)"/></div>
+                                                <div class="duration-pill"><i class="fa fa-clock-o"/><t t-esc="svc.duration"/> min</div>
+                                                <img t-att-src="'/beauty/service/' + str(svc.id) + '/image'" t-att-alt="svc.name" class="service-img"/>
+                                            </div>
+
+                                            <!-- Card Body with Aligned Duration Badge -->
+                                            <div class="service-info">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div class="service-name"><t t-esc="svc.name"/></div>
+                                                    <div class="duration-badge-inline">
+                                                        <i class="fa fa-clock-o"/><t t-esc="svc.duration"/> min
+                                                    </div>
+                                                </div>
+                                                <div class="service-desc"><t t-esc="svc.description or 'Professional service offered with standard care.'" /></div>
+                                                
+                                                <!-- Selection Button Trigger -->
+                                                <button type="button" class="btn-select-action"
+                                                        t-att-onclick="'selectService(event, ' + str(svc.id) + ')'">
+                                                    <span t-if="str(svc.id) == post.get('service_id')"><i class="fa fa-check me-1"/> Selected</span>
+                                                    <span t-else="">Select Service</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </t>
                                 </div>
                             </t>
-                        </div>
 
-                        <!-- Booking Form -->
-                        <div class="booking-form">
-                            <div t-if="submitted" class="alert-box alert-success" role="status">
-                                <i class="fas fa-check-circle" style="margin-right: 10px;"/>
-                                Your booking request has been received. The professional will confirm it shortly.
+                            <!-- Section 2: Date, Time & Contact Details -->
+                            <div class="form-card">
+                                <div class="section-heading">
+                                    <i class="fa fa-calendar-check-o text-primary"/>
+                                    <span>2. Appointment Date &amp; Contact Information</span>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Appointment Date &amp; Time *</label>
+                                        <input type="datetime-local" name="appointment_date" class="form-control" t-att-min="today" t-att-value="post.get('appointment_date', '')" required="required"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Full Name *</label>
+                                        <input type="text" name="customer_name" class="form-control" placeholder="e.g. John Doe" t-att-value="post.get('customer_name', '')" required="required"/>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-1">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Phone Number *</label>
+                                        <input type="tel" name="customer_phone" class="form-control" placeholder="(555) 000-1234" t-att-value="post.get('customer_phone', '')" required="required"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Email Address</label>
+                                        <input type="email" name="customer_email" class="form-control" placeholder="john@example.com" t-att-value="post.get('customer_email', '')"/>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <label class="form-label-custom">Notes / Preferences</label>
+                                    <textarea name="notes" class="form-control" rows="3" placeholder="Special requests..."><t t-esc="post.get('notes', '')"/></textarea>
+                                </div>
+
+                                <div class="mt-4">
+                                    <button type="submit" class="btn-submit-main">
+                                        <i class="fa fa-calendar-check-o"/> Confirm &amp; Book Appointment
+                                    </button>
+                                </div>
                             </div>
-                            <div t-if="error" class="alert-box alert-danger" role="alert">
-                                <i class="fas fa-exclamation-circle" style="margin-right: 10px;"/>
-                                <t t-esc="error"/>
-                            </div>
-
-                            <form t-if="not submitted" method="post">
-                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-
-                                <!-- Service Selection -->
-                                <div class="form-section">
-                                    <div class="section-title">
-                                        <i class="fas fa-brush"/>Service Selection
-                                    </div>
-                                    <label class="booking-label" for="service_id">Choose a service</label>
-                                    <select id="service_id" name="service_id" class="form-select" required="required">
-                                        <option value="">-- Select a service --</option>
-                                        <option t-foreach="services" t-as="service"
-                                                t-att-value="service.id"
-                                                t-att-selected="'selected' if str(service.id) == post.get('service_id') else None">
-                                            <t t-esc="service.name"/> • <t t-esc="service.duration"/> min • $<t t-esc="'{:.2f}'.format(service.price)"/>
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <!-- Date &amp; Time -->
-                                <div class="form-section">
-                                    <div class="section-title">
-                                        <i class="fas fa-calendar-alt"/>Date &amp; Time
-                                    </div>
-                                    <label class="booking-label" for="appointment_date">Select your preferred date and time</label>
-                                    <input id="appointment_date" name="appointment_date" type="datetime-local"
-                                           class="form-control" required="required"
-                                           t-att-min="today"
-                                           t-att-value="post.get('appointment_date', '')"/>
-                                </div>
-
-                                <!-- Your Details -->
-                                <div class="form-section">
-                                    <div class="section-title">
-                                        <i class="fas fa-user"/>Your Details
-                                    </div>
-                                    <div class="form-row">
-                                        <div>
-                                            <label class="booking-label" for="customer_name">Full Name</label>
-                                            <input id="customer_name" name="customer_name" class="form-control"
-                                                   required="required" t-att-value="post.get('customer_name', '')"
-                                                   placeholder="John Doe"/>
-                                        </div>
-                                        <div>
-                                            <label class="booking-label" for="customer_phone">Phone Number</label>
-                                            <input id="customer_phone" name="customer_phone" class="form-control"
-                                                   required="required" t-att-value="post.get('customer_phone', '')"
-                                                   placeholder="(123) 456-7890"/>
-                                        </div>
-                                    </div>
-                                    <div style="margin-top: 14px;">
-                                        <label class="booking-label" for="customer_email">Email Address</label>
-                                        <input id="customer_email" name="customer_email" type="email" class="form-control"
-                                               t-att-value="post.get('customer_email', '')"
-                                               placeholder="your.email@example.com"/>
-                                    </div>
-                                </div>
-
-                                <!-- Additional Notes -->
-                                <div class="form-section">
-                                    <div class="section-title">
-                                        <i class="fas fa-sticky-note"/>Additional Notes
-                                    </div>
-                                    <label class="booking-label" for="notes">Any special requests or details?</label>
-                                    <textarea id="notes" name="notes" class="form-control"
-                                              placeholder="Tell us if you have any preferences or concerns..."><t t-esc="post.get('notes', '')"/></textarea>
-                                </div>
-
-                                <!-- Submit Button -->
-                                <button type="submit" class="btn btn-book">
-                                    <i class="fas fa-calendar-check" style="margin-right: 8px;"/>Request Booking
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+                        </form>
+                    </t>
                 </main>
+
+                <script>
+                    function toggleTheme() {
+                        const current = document.documentElement.getAttribute('data-theme') || 'light';
+                        const next = current === 'dark' ? 'light' : 'dark';
+                        document.documentElement.setAttribute('data-theme', next);
+                        localStorage.setItem('beauty_theme', next);
+                        updateThemeIcon(next);
+                    }
+                    function updateThemeIcon(theme) {
+                        const icon = document.getElementById('themeToggleIcon');
+                        if (icon) {
+                            icon.className = theme === 'dark' ? 'fa fa-sun-o' : 'fa fa-moon-o';
+                        }
+                    }
+                    (function() {
+                        const saved = localStorage.getItem('beauty_theme') || 'light';
+                        document.documentElement.setAttribute('data-theme', saved);
+                        window.addEventListener('DOMContentLoaded', () => updateThemeIcon(saved));
+                    })();
+
+                    function selectService(event, id) {
+                        if (event) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        document.getElementById('service_id_input').value = id;
+                        document.querySelectorAll('.service-card').forEach(card => {
+                            card.classList.remove('selected');
+                            const btn = card.querySelector('.btn-select-action');
+                            if (btn) btn.innerHTML = 'Select Service';
+                        });
+                        const card = document.getElementById('svc-card-' + id);
+                        if (card) {
+                            card.classList.add('selected');
+                            const btn = card.querySelector('.btn-select-action');
+                            if (btn) btn.innerHTML = '<i class="fa fa-check me-1"></i> Selected';
+                        }
+                    }
+                </script>
             </body>
         </html>
     </template>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Local Email Sandbox Outgoing Mail Server -->
+        <record id="ir_mail_server_sandbox" model="ir.mail_server">
+            <field name="name">Testing Email Sandbox (Local)</field>
+            <field name="smtp_host">localhost</field>
+            <field name="smtp_port">1025</field>
+            <field name="smtp_encryption">none</field>
+            <field name="sequence">1</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Booking Confirmation Email Template -->
+        <record id="email_template_booking_confirmation" model="mail.template">
+            <field name="name">Beauty Booking: Confirmation Email</field>
+            <field name="model_id" ref="beauty_booking.model_beauty_booking"/>
+            <field name="subject">Booking Confirmed: {{ object.name }} with {{ object.professional_id.name }}</field>
+            <field name="email_from">{{ object.professional_id.email or 'noreply@beautybooking.com' }}</field>
+            <field name="email_to">{{ object.customer_email }}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html" type="html">
+                <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc; border-radius: 16px; color: #1e293b;">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #4c1d95 100%); padding: 30px; border-radius: 12px; text-align: center; color: #ffffff;">
+                        <h2 style="margin: 0; font-size: 24px; font-weight: 800;">✨ Booking Confirmed!</h2>
+                        <p style="margin: 5px 0 0; opacity: 0.8; font-size: 14px;">Reference: <t t-out="object.name"/></p>
+                    </div>
+
+                    <!-- Main Body -->
+                    <div style="background: #ffffff; padding: 30px; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                        <p style="font-size: 16px; margin-top: 0;">Hello <strong><t t-out="object.customer_name"/></strong>,</p>
+                        <p style="color: #475569; line-height: 1.6;">Your appointment has been successfully scheduled. Here are your booking details:</p>
+
+                        <!-- Details Table -->
+                        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 10px 0; color: #64748b; font-weight: 600;">Professional:</td>
+                                <td style="padding: 10px 0; font-weight: 700; text-align: right; color: #0f172a;"><t t-out="object.professional_id.name"/></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 10px 0; color: #64748b; font-weight: 600;">Service:</td>
+                                <td style="padding: 10px 0; font-weight: 700; text-align: right; color: #0f172a;"><t t-out="object.service_id.name"/></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 10px 0; color: #64748b; font-weight: 600;">Date &amp; Time:</td>
+                                <td style="padding: 10px 0; font-weight: 700; text-align: right; color: #7c3aed;">
+                                    <t t-out="object.appointment_date.strftime('%A, %B %d, %Y at %I:%M %p')"/>
+                                </td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 10px 0; color: #64748b; font-weight: 600;">Duration:</td>
+                                <td style="padding: 10px 0; font-weight: 700; text-align: right; color: #0f172a;"><t t-out="object.duration"/> mins</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: #64748b; font-weight: 600;">Total Price:</td>
+                                <td style="padding: 10px 0; font-weight: 800; text-align: right; color: #16a34a; font-size: 18px;">$<t t-out="'{:.2f}'.format(object.price)"/></td>
+                            </tr>
+                        </table>
+
+                        <t t-if="object.notes">
+                            <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                <strong style="font-size: 13px; color: #475569;">Special Instructions / Notes:</strong>
+                                <p style="margin: 5px 0 0; color: #334155; font-size: 14px;"><t t-out="object.notes"/></p>
+                            </div>
+                        </t>
+
+                        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
+                            <p style="color: #64748b; font-size: 13px; margin: 0;">Location: <strong><t t-out="object.professional_id.location or 'Shop Address'"/></strong></p>
+                            <p style="color: #64748b; font-size: 13px; margin: 5px 0 0;">Contact Phone: <strong><t t-out="object.professional_id.phone or 'N/A'"/></strong></p>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="text-align: center; margin-top: 20px; color: #94a3b8; font-size: 12px;">
+                        <p style="margin: 0;">Sent automatically via Beauty Booking Platform Email Sandbox.</p>
+                    </div>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

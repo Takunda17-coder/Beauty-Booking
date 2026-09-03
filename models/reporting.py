@@ -122,17 +122,8 @@ class BeautyReportingMethods(models.Model):
         }
 
     def action_send_confirmation_email(self):
-        """Action to send confirmation email to customer.
-        
-        Note: Requires email module and SMTP configuration.
-        This is a placeholder for email notification functionality.
-        """
-        for booking in self:
-            if booking.customer_email:
-                # TODO: Implement email sending
-                # Can use self.env['mail.mail'].create() or template rendering
-                pass
-        return True
+        """Action to send confirmation email to customer."""
+        return super().action_send_confirmation_email()
 
     def action_send_reminder_sms(self):
         """Action to send SMS reminder before appointment.
