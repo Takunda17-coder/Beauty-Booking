@@ -27,44 +27,83 @@ class BeautyPayment(models.Model):
         default='New',
     )
 
+    payment_type = fields.Selection(
+        selection=[
+            ('booking', 'Customer Booking'),
+            ('subscription', 'Professional SaaS Subscription'),
+        ],
+        string='Payment Type',
+        default='booking',
+        required=True,
+    )
+
     booking_id = fields.Many2one(
         'beauty.booking',
         string='Booking',
-        required=True,
+        required=False,
         ondelete='cascade',
+    )
+
+    subscription_id = fields.Many2one(
+        'beauty.subscription',
+        string='Subscription',
+        required=False,
+        ondelete='set null',
     )
 
     professional_id = fields.Many2one(
         'beauty.professional',
         string='Professional',
-        related='booking_id.professional_id',
+        compute='_compute_party_details',
         store=True,
+        readonly=False,
     )
 
     service_id = fields.Many2one(
         'beauty.service',
         string='Service',
-        related='booking_id.service_id',
+        compute='_compute_party_details',
         store=True,
+        readonly=False,
     )
 
     customer_name = fields.Char(
-        string='Customer Name',
-        related='booking_id.customer_name',
+        string='Customer / Payer Name',
+        compute='_compute_party_details',
         store=True,
+        readonly=False,
     )
 
     customer_phone = fields.Char(
-        string='Customer Phone',
-        related='booking_id.customer_phone',
+        string='Phone',
+        compute='_compute_party_details',
         store=True,
+        readonly=False,
     )
 
     customer_email = fields.Char(
-        string='Customer Email',
-        related='booking_id.customer_email',
+        string='Email',
+        compute='_compute_party_details',
         store=True,
+        readonly=False,
     )
+
+    @api.depends('booking_id', 'subscription_id', 'payment_type')
+    def _compute_party_details(self):
+        for record in self:
+            if record.payment_type == 'subscription' and record.subscription_id:
+                prof = record.subscription_id.professional_id
+                record.professional_id = prof
+                record.service_id = False
+                record.customer_name = prof.name if prof else 'Professional'
+                record.customer_phone = prof.phone if prof else ''
+                record.customer_email = prof.email if prof else ''
+            elif record.booking_id:
+                record.professional_id = record.booking_id.professional_id
+                record.service_id = record.booking_id.service_id
+                record.customer_name = record.booking_id.customer_name
+                record.customer_phone = record.booking_id.customer_phone
+                record.customer_email = record.booking_id.customer_email
 
     amount = fields.Float(
         string='Amount',
@@ -134,12 +173,14 @@ class BeautyPayment(models.Model):
     @api.model
     def create(self, vals):
         if vals.get('name', 'New') == 'New':
-            booking_name = 'BK'
-            if vals.get('booking_id'):
+            prefix = 'BK'
+            if vals.get('payment_type') == 'subscription':
+                prefix = 'SUB'
+            elif vals.get('booking_id'):
                 booking = self.env['beauty.booking'].browse(vals['booking_id'])
                 if booking.exists() and booking.name:
-                    booking_name = booking.name
-            vals['name'] = f"PAY-{booking_name}-{self.env['ir.sequence'].next_by_code('beauty.payment') or fields.Datetime.now().strftime('%Y%m%d%H%M%S')}"
+                    prefix = booking.name
+            vals['name'] = f"PAY-{prefix}-{self.env['ir.sequence'].next_by_code('beauty.payment') or fields.Datetime.now().strftime('%Y%m%d%H%M%S')}"
         return super().create(vals)
 
     def _get_pesepay_client(self):
@@ -157,17 +198,29 @@ class BeautyPayment(models.Model):
         result_url = f"{base_url.rstrip('/')}/beauty/payment/result?ref={self.name}"
         return_url = result_url
 
+        if self.payment_type == 'subscription' and self.subscription_id:
+            reason = f"Beauty Booking SaaS Subscription - {self.subscription_id.plan_id.name}"
+            prof = self.subscription_id.professional_id
+            customer_name = prof.name if prof else 'Professional'
+            customer_phone = prof.phone if prof else ''
+            customer_email = prof.email if prof else ''
+        else:
+            reason = f"Booking for {self.service_id.name or 'Service'} with {self.professional_id.name or 'Professional'}"
+            customer_name = self.customer_name
+            customer_phone = self.customer_phone
+            customer_email = self.customer_email
+
         client = self._get_pesepay_client()
         result = client.initiate_payment(
             merchant_reference=self.name,
             amount=self.amount,
             currency_code=self.currency,
-            reason=f"Booking for {self.service_id.name or 'Service'} with {self.professional_id.name or 'Professional'}",
+            reason=reason,
             result_url=result_url,
             return_url=return_url,
-            customer_name=self.customer_name,
-            customer_phone=self.customer_phone,
-            customer_email=self.customer_email,
+            customer_name=customer_name,
+            customer_phone=customer_phone,
+            customer_email=customer_email,
         )
 
         if result['success']:
@@ -222,18 +275,18 @@ class BeautyPayment(models.Model):
         return True
 
     def action_mark_paid(self):
-        """Mark payment as completed, confirm the booking, and trigger email."""
+        """Mark payment as completed, confirm the booking or activate subscription, and trigger email."""
         for record in self:
             record.write({
                 'state': 'paid',
                 'payment_date': fields.Datetime.now(),
                 'response_message': 'Payment confirmed successfully via Pesepay.',
             })
-            # Confirm booking if in draft or pending
-            if record.booking_id and record.booking_id.state == 'draft':
-                record.booking_id.action_confirm()
-            # Send confirmation email
-            if record.booking_id:
+            if record.payment_type == 'subscription' and record.subscription_id:
+                record.subscription_id.action_activate_subscription()
+            elif record.booking_id:
+                if record.booking_id.state == 'draft':
+                    record.booking_id.action_confirm()
                 try:
                     record.booking_id.action_send_confirmation_email()
                 except Exception:

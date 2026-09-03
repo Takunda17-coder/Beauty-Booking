@@ -32,6 +32,7 @@
         'data/mail_template_data.xml',
         'data/mail_server_data.xml',
         'data/pesepay_data.xml',
+        'data/subscription_data.xml',
 
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -42,6 +43,7 @@
         'views/booking_search.xml',
         'views/booking_reports.xml',
         'views/payment_views.xml',
+        'views/subscription_views.xml',
         'views/menus.xml',
         'web_views/booking_templates.xml',
         'web_views/portal_templates.xml',

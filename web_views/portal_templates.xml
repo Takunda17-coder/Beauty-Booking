@@ -41,6 +41,9 @@
                             <a href="/beauty/email_sandbox" t-att-class="'nav-link-item ' + ('active' if active_page == 'sandbox' else '')">
                                 <i class="fa fa-envelope-o me-2 d-lg-none"/>Email Sandbox
                             </a>
+                            <a href="/beauty/subscription" t-att-class="'nav-link-item ' + ('active' if active_page == 'subscription' else '')">
+                                <i class="fa fa-credit-card me-2 d-lg-none"/>Subscription
+                            </a>
                             
                             <!-- Desktop Dark Mode Toggle Button -->
                             <button class="theme-toggle-btn d-none d-lg-inline-flex ms-lg-1" onclick="toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
@@ -1747,6 +1750,140 @@
                     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
                 </body>
             </html>
+        </template>
+
+        <!-- Subscription Management Template -->
+        <template id="portal_subscription" name="Professional SaaS Subscription">
+            <t t-call="beauty_booking.portal_layout">
+                <t t-set="active_page" t-value="'subscription'"/>
+                <div class="content-container">
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                        <div>
+                            <h2 class="fw-bolder mb-1" style="color: var(--text-main);">Subscription &amp; SaaS Billing</h2>
+                            <p class="mb-0" style="color: var(--text-muted);">Manage your platform membership tier and Pesepay billing.</p>
+                        </div>
+                        <t t-if="subscription">
+                            <span class="badge rounded-pill px-3 py-2 fs-6" 
+                                  t-att-style="'background: ' + ('#10b981' if subscription.status == 'active' else ('#f59e0b' if subscription.status == 'trialing' else '#ef4444')) + '; color: #fff;'">
+                                Status: <t t-esc="subscription.status.title()"/>
+                            </span>
+                        </t>
+                    </div>
+
+                    <!-- Current Subscription Overview Card -->
+                    <t t-if="subscription">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-5" style="background: var(--bg-card); border: 1px solid var(--border-color) !important;">
+                            <div class="row align-items-center">
+                                <div class="col-md-7">
+                                    <div class="small fw-bold text-uppercase text-primary mb-1">Current Membership</div>
+                                    <h3 class="fw-bold mb-2" style="color: var(--text-main);"><t t-esc="subscription.plan_id.name"/></h3>
+                                    <p class="small text-muted mb-2"><t t-esc="subscription.plan_id.description"/></p>
+                                    <div class="d-flex gap-4 small text-muted">
+                                        <span><i class="fa fa-calendar me-1"/> Renewal: <strong><t t-esc="subscription.current_period_end"/></strong></span>
+                                        <span><i class="fa fa-refresh me-1"/> Auto-Renew: <strong><t t-esc="'Enabled' if subscription.auto_renew else 'Disabled'"/></strong></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                                    <div class="fs-2 fw-bolder text-success mb-2">
+                                        $<t t-esc="'{:.2f}'.format(subscription.plan_id.price)"/>
+                                        <span class="fs-6 text-muted fw-normal">/<t t-esc="subscription.plan_id.billing_interval"/></span>
+                                    </div>
+                                    <t t-if="subscription.plan_id.price &gt; 0 and subscription.status != 'cancelled'">
+                                        <a t-att-href="'/beauty/subscription/subscribe/' + str(subscription.plan_id.id)" class="btn btn-primary rounded-pill px-4 py-2">
+                                            <i class="fa fa-credit-card me-1"/> Pay / Renew via Pesepay
+                                        </a>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- SaaS Pricing Tiers Grid -->
+                    <h4 class="fw-bold mb-3" style="color: var(--text-main);">Available Platform Plans</h4>
+                    <div class="row g-4 mb-5">
+                        <t t-foreach="plans" t-as="plan">
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 position-relative" 
+                                     t-att-style="'background: var(--bg-card); border: 1.5px solid ' + ('var(--accent)' if subscription and subscription.plan_id.id == plan.id else 'var(--border-color)') + ' !important;'">
+                                    
+                                    <t t-if="subscription and subscription.plan_id.id == plan.id">
+                                        <span class="position-absolute top-0 end-0 translate-middle-y me-3 badge bg-primary rounded-pill px-3 py-1">Your Plan</span>
+                                    </t>
+                                    
+                                    <h5 class="fw-bold mb-1" style="color: var(--text-main);"><t t-esc="plan.name"/></h5>
+                                    <p class="small text-muted mb-3"><t t-esc="plan.description"/></p>
+                                    
+                                    <div class="fs-3 fw-bolder mb-3" style="color: var(--text-main);">
+                                        $<t t-esc="'{:.2f}'.format(plan.price)"/>
+                                        <span class="fs-6 text-muted fw-normal">/<t t-esc="plan.billing_interval"/></span>
+                                    </div>
+
+                                    <ul class="list-unstyled small mb-4 flex-grow-1" style="color: var(--text-main);">
+                                        <li class="mb-2"><i class="fa fa-check text-success me-2"/> <t t-esc="'Unlimited services' if plan.max_services == 0 else f'Up to {plan.max_services} services'"/></li>
+                                        <li class="mb-2"><i class="fa fa-check text-success me-2"/> <t t-esc="'Unlimited monthly bookings' if plan.max_bookings_month == 0 else f'Up to {plan.max_bookings_month} bookings/month'"/></li>
+                                        <li class="mb-2" t-if="plan.featured_listing"><i class="fa fa-check text-success me-2"/> Featured Search Placement</li>
+                                        <li class="mb-2" t-if="plan.analytics_dashboard"><i class="fa fa-check text-success me-2"/> Revenue Analytics Dashboard</li>
+                                        <li class="mb-2" t-if="plan.sms_notifications"><i class="fa fa-check text-success me-2"/> Automated SMS Reminders</li>
+                                    </ul>
+
+                                    <div class="mt-auto">
+                                        <t t-if="subscription and subscription.plan_id.id == plan.id">
+                                            <button class="btn btn-outline-secondary w-100 rounded-pill py-2" disabled="disabled">Current Plan</button>
+                                        </t>
+                                        <t t-else="">
+                                            <a t-att-href="'/beauty/subscription/subscribe/' + str(plan.id)" class="btn btn-primary w-100 rounded-pill py-2 text-white text-decoration-none">
+                                                <i class="fa fa-arrow-up me-1"/> <t t-esc="'Switch to Plan' if plan.price == 0 else f'Upgrade via Pesepay (${plan.price:.0f})'"/>
+                                            </a>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Billing History Table -->
+                    <h4 class="fw-bold mb-3" style="color: var(--text-main);">Pesepay Subscription Billing History</h4>
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: var(--bg-card); border: 1px solid var(--border-color) !important;">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background: var(--input-bg);">
+                                    <tr>
+                                        <th class="ps-4">Reference</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Gateway Ref</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-if="payments">
+                                        <t t-foreach="payments" t-as="pay">
+                                            <tr>
+                                                <td class="ps-4 fw-bold font-monospace text-primary"><t t-esc="pay.name"/></td>
+                                                <td><t t-esc="pay.payment_date or pay.create_date"/></td>
+                                                <td class="fw-bold text-success">$<t t-esc="'{:.2f}'.format(pay.amount)"/></td>
+                                                <td><span class="badge bg-secondary rounded-pill"><t t-esc="pay.payment_method.upper()"/></span></td>
+                                                <td class="small font-monospace text-muted"><t t-esc="pay.pesepay_reference or 'Pending'"/></td>
+                                                <td>
+                                                    <span t-att-class="'badge rounded-pill ' + ('bg-success' if pay.state == 'paid' else ('bg-warning text-dark' if pay.state == 'pending' else 'bg-danger'))">
+                                                        <t t-esc="pay.state.title()"/>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                    <t t-if="not payments">
+                                        <tr>
+                                            <td colspan="6" class="text-center py-4 text-muted">No subscription payments recorded yet.</td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
         </template>
     </data>
 </odoo>

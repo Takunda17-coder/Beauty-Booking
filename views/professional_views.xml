@@ -45,6 +45,8 @@
                             <field name="phone"/>
                             <field name="email"/>
                             <field name="location"/>
+                            <field name="subscription_plan_id" readonly="1"/>
+                            <field name="subscription_status" widget="badge" readonly="1"/>
                             <field name="verified"/>
                             <field name="active"/>
                         </group>
@@ -62,6 +64,18 @@
                                     <field name="price"/>
                                     <field name="duration"/>
                                     <field name="active"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Subscriptions &amp; Billing">
+                            <field name="subscription_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="plan_id"/>
+                                    <field name="current_period_start"/>
+                                    <field name="current_period_end"/>
+                                    <field name="status" widget="badge"/>
+                                    <field name="auto_renew"/>
                                 </tree>
                             </field>
                         </page>

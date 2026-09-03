@@ -9,3 +9,7 @@ access_beauty_availability_user,beauty.availability.user,model_beauty_availabili
 access_beauty_availability_manager,beauty.availability.manager,model_beauty_availability,beauty_booking.group_beauty_manager,1,1,1,1
 access_beauty_payment_user,beauty.payment.user,model_beauty_payment,beauty_booking.group_beauty_user,1,1,1,0
 access_beauty_payment_manager,beauty.payment.manager,model_beauty_payment,beauty_booking.group_beauty_manager,1,1,1,1
+access_beauty_subscription_plan_user,beauty.subscription.plan.user,model_beauty_subscription_plan,beauty_booking.group_beauty_user,1,0,0,0
+access_beauty_subscription_plan_manager,beauty.subscription.plan.manager,model_beauty_subscription_plan,beauty_booking.group_beauty_manager,1,1,1,1
+access_beauty_subscription_user,beauty.subscription.user,model_beauty_subscription,beauty_booking.group_beauty_user,1,1,1,0
+access_beauty_subscription_manager,beauty.subscription.manager,model_beauty_subscription,beauty_booking.group_beauty_manager,1,1,1,1

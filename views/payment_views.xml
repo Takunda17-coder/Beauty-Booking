@@ -11,7 +11,9 @@
                   decoration-success="state == 'paid'"
                   decoration-danger="state in ('failed', 'cancelled')">
                 <field name="name"/>
-                <field name="booking_id"/>
+                <field name="payment_type" widget="badge"/>
+                <field name="booking_id" attrs="{'invisible': [('payment_type', '!=', 'booking')]}"/>
+                <field name="subscription_id" attrs="{'invisible': [('payment_type', '!=', 'subscription')]}"/>
                 <field name="customer_name"/>
                 <field name="customer_phone"/>
                 <field name="professional_id"/>
@@ -68,13 +70,15 @@
                     </div>
 
                     <group>
-                        <group string="Booking Details">
-                            <field name="booking_id"/>
+                        <group string="Source &amp; Purpose">
+                            <field name="payment_type"/>
+                            <field name="booking_id" attrs="{'invisible': [('payment_type', '!=', 'booking')]}"/>
+                            <field name="subscription_id" attrs="{'invisible': [('payment_type', '!=', 'subscription')]}"/>
                             <field name="professional_id"/>
-                            <field name="service_id"/>
+                            <field name="service_id" attrs="{'invisible': [('payment_type', '!=', 'booking')]}"/>
                             <field name="payment_date"/>
                         </group>
-                        <group string="Customer Information">
+                        <group string="Customer / Payer Information">
                             <field name="customer_name"/>
                             <field name="customer_phone"/>
                             <field name="customer_email"/>

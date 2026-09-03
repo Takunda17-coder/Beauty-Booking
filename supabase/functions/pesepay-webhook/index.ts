@@ -50,14 +50,30 @@ serve(async (req) => {
         })
         .eq("id", payment.id);
 
-      // 2. Confirm booking
-      await supabaseClient
-        .from("bookings")
-        .update({ status: "confirmed" })
-        .eq("id", payment.booking_id);
+      // 2. If customer booking payment: confirm booking
+      if (payment.booking_id) {
+        await supabaseClient
+          .from("bookings")
+          .update({ status: "confirmed" })
+          .eq("id", payment.booking_id);
+        console.log(`[Pesepay Webhook] Booking ${payment.booking_id} confirmed via ${merchantReference}`);
+      }
 
-      // 3. Trigger email notification (via Resend or Mailtrap)
-      console.log(`[Pesepay Webhook] Booking ${payment.booking_id} confirmed via ${merchantReference}`);
+      // 3. If professional subscription payment: activate subscription
+      if (payment.subscription_id) {
+        const renewalDate = new Date();
+        renewalDate.setDate(renewalDate.getDate() + 30);
+        await supabaseClient
+          .from("subscriptions")
+          .update({
+            status: "active",
+            current_period_start: new Date().toISOString(),
+            current_period_end: renewalDate.toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", payment.subscription_id);
+        console.log(`[Pesepay Webhook] Subscription ${payment.subscription_id} activated via ${merchantReference}`);
+      }
     } else if (["FAILED", "CANCELLED"].includes(transactionStatus)) {
       await supabaseClient
         .from("payments")
@@ -68,10 +84,12 @@ serve(async (req) => {
         })
         .eq("id", payment.id);
 
-      await supabaseClient
-        .from("bookings")
-        .update({ status: "cancelled" })
-        .eq("id", payment.booking_id);
+      if (payment.booking_id) {
+        await supabaseClient
+          .from("bookings")
+          .update({ status: "cancelled" })
+          .eq("id", payment.booking_id);
+      }
     }
 
     return new Response(JSON.stringify({ status: "SUCCESS" }), {

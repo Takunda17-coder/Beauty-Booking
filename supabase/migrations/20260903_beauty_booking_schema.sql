@@ -121,15 +121,72 @@ ON public.bookings FOR ALL USING (
     EXISTS (SELECT 1 FROM public.professionals WHERE id = bookings.professional_id AND user_id = auth.uid())
 );
 
--- 6. PESEPAY PAYMENTS TABLE
+-- 6. SUBSCRIPTION PLANS (SaaS Tiers)
+CREATE TABLE IF NOT EXISTS public.subscription_plans (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    code TEXT NOT NULL UNIQUE,
+    price NUMERIC(10,2) NOT NULL DEFAULT 0.00,
+    currency TEXT NOT NULL DEFAULT 'USD',
+    billing_interval TEXT NOT NULL DEFAULT 'monthly' CHECK (billing_interval IN ('monthly', 'yearly')),
+    max_services INT DEFAULT 5,
+    max_bookings_month INT DEFAULT 50,
+    featured_listing BOOLEAN DEFAULT FALSE,
+    sms_notifications BOOLEAN DEFAULT FALSE,
+    custom_domain BOOLEAN DEFAULT FALSE,
+    analytics_dashboard BOOLEAN DEFAULT FALSE,
+    description TEXT,
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.subscription_plans ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Subscription plans are viewable by everyone" 
+ON public.subscription_plans FOR SELECT USING (active = true);
+
+-- 7. PROFESSIONAL SUBSCRIPTIONS
+CREATE TABLE IF NOT EXISTS public.subscriptions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    professional_id UUID NOT NULL REFERENCES public.professionals(id) ON DELETE CASCADE,
+    plan_id UUID NOT NULL REFERENCES public.subscription_plans(id) ON DELETE RESTRICT,
+    status TEXT NOT NULL DEFAULT 'trialing' CHECK (status IN ('trialing', 'active', 'past_due', 'cancelled')),
+    current_period_start TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    current_period_end TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '14 days'),
+    auto_renew BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Professionals can view their own subscriptions" 
+ON public.subscriptions FOR SELECT USING (
+    EXISTS (SELECT 1 FROM public.professionals WHERE id = subscriptions.professional_id AND user_id = auth.uid())
+);
+CREATE POLICY "Professionals can update their own subscriptions" 
+ON public.subscriptions FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM public.professionals WHERE id = subscriptions.professional_id AND user_id = auth.uid())
+);
+
+-- Seed initial SaaS subscription plans
+INSERT INTO public.subscription_plans (name, code, price, currency, billing_interval, max_services, max_bookings_month, featured_listing, sms_notifications, analytics_dashboard, description)
+VALUES 
+    ('Starter (Solo Barber)', 'starter', 0.00, 'USD', 'monthly', 5, 50, false, false, false, 'Ideal for independent barbers starting out. Up to 5 services and 50 bookings/month.'),
+    ('Pro Barber & Stylist', 'pro', 15.00, 'USD', 'monthly', 0, 0, true, true, true, 'Unlimited services, unlimited bookings, revenue analytics, and priority customer booking.'),
+    ('Salon & Studio VIP', 'salon', 35.00, 'USD', 'monthly', 0, 0, true, true, true, 'Multi-chair capability, featured search badge, custom domain support, and dedicated support.')
+ON CONFLICT (code) DO NOTHING;
+
+-- 8. PESEPAY PAYMENTS TABLE (Customer Bookings & Pro Subscriptions)
 CREATE TABLE IF NOT EXISTS public.payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    booking_id UUID NOT NULL REFERENCES public.bookings(id) ON DELETE CASCADE,
+    payment_type TEXT NOT NULL DEFAULT 'booking' CHECK (payment_type IN ('booking', 'subscription')),
+    booking_id UUID REFERENCES public.bookings(id) ON DELETE CASCADE,
+    subscription_id UUID REFERENCES public.subscriptions(id) ON DELETE SET NULL,
+    professional_id UUID REFERENCES public.professionals(id) ON DELETE CASCADE,
     merchant_reference TEXT NOT NULL UNIQUE,
     pesepay_reference TEXT,
     amount NUMERIC(10,2) NOT NULL,
     currency TEXT NOT NULL DEFAULT 'USD',
-    payment_method TEXT, -- 'ecocash', 'onemoney', 'card'
+    payment_method TEXT, -- 'pesepay', 'ecocash', 'onemoney', 'card'
     state TEXT NOT NULL DEFAULT 'pending' CHECK (state IN ('draft', 'pending', 'paid', 'failed', 'cancelled')),
     poll_url TEXT,
     redirect_url TEXT,
@@ -140,13 +197,17 @@ CREATE TABLE IF NOT EXISTS public.payments (
 
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Professionals can view payments for their bookings" 
+CREATE POLICY "Professionals can view payments for their bookings and subscriptions" 
 ON public.payments FOR SELECT USING (
-    EXISTS (
+    (professional_id IS NOT NULL AND EXISTS (
+        SELECT 1 FROM public.professionals p WHERE p.id = payments.professional_id AND p.user_id = auth.uid()
+    ))
+    OR
+    (booking_id IS NOT NULL AND EXISTS (
         SELECT 1 FROM public.bookings b
         JOIN public.professionals p ON b.professional_id = p.id
         WHERE b.id = payments.booking_id AND p.user_id = auth.uid()
-    )
+    ))
 );
 
 -- 7. DOUBLE BOOKING OVERLAP GUARD TRIGGER

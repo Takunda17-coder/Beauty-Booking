@@ -6,3 +6,4 @@ from . import reporting
 from . import mailtrap_client
 from . import pesepay_client
 from . import payment
+from . import subscription

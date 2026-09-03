@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Subscription References -->
+        <record id="seq_beauty_subscription" model="ir.sequence">
+            <field name="name">Beauty Professional Subscription</field>
+            <field name="code">beauty.subscription</field>
+            <field name="prefix">SUB-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Tier 1: Free Starter Plan -->
+        <record id="plan_starter" model="beauty.subscription.plan">
+            <field name="name">Starter (Solo Barber)</field>
+            <field name="code">starter</field>
+            <field name="price">0.0</field>
+            <field name="currency">USD</field>
+            <field name="billing_interval">monthly</field>
+            <field name="max_services">5</field>
+            <field name="max_bookings_month">50</field>
+            <field name="featured_listing" eval="False"/>
+            <field name="sms_notifications" eval="False"/>
+            <field name="custom_domain" eval="False"/>
+            <field name="analytics_dashboard" eval="False"/>
+            <field name="description">Ideal for independent barbers starting out. Up to 5 services and 50 bookings/month.</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Tier 2: Professional Plan -->
+        <record id="plan_pro" model="beauty.subscription.plan">
+            <field name="name">Pro Barber &amp; Stylist</field>
+            <field name="code">pro</field>
+            <field name="price">15.0</field>
+            <field name="currency">USD</field>
+            <field name="billing_interval">monthly</field>
+            <field name="max_services">0</field>
+            <field name="max_bookings_month">0</field>
+            <field name="featured_listing" eval="True"/>
+            <field name="sms_notifications" eval="True"/>
+            <field name="custom_domain" eval="False"/>
+            <field name="analytics_dashboard" eval="True"/>
+            <field name="description">Unlimited services, unlimited bookings, revenue analytics, and priority customer booking.</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Tier 3: Salon Studio VIP Plan -->
+        <record id="plan_salon" model="beauty.subscription.plan">
+            <field name="name">Salon &amp; Studio VIP</field>
+            <field name="code">salon</field>
+            <field name="price">35.0</field>
+            <field name="currency">USD</field>
+            <field name="billing_interval">monthly</field>
+            <field name="max_services">0</field>
+            <field name="max_bookings_month">0</field>
+            <field name="featured_listing" eval="True"/>
+            <field name="sms_notifications" eval="True"/>
+            <field name="custom_domain" eval="True"/>
+            <field name="analytics_dashboard" eval="True"/>
+            <field name="description">Multi-chair capability, featured search badge, custom domain support, and dedicated support.</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

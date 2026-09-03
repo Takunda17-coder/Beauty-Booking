@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Subscription Plan Views -->
+    <record id="view_beauty_subscription_plan_tree" model="ir.ui.view">
+        <field name="name">beauty.subscription.plan.tree</field>
+        <field name="model">beauty.subscription.plan</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="price" widget="monetary" options="{'currency_field': 'currency'}"/>
+                <field name="currency" invisible="1"/>
+                <field name="billing_interval"/>
+                <field name="max_services"/>
+                <field name="max_bookings_month"/>
+                <field name="featured_listing"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_beauty_subscription_plan_form" model="ir.ui.view">
+        <field name="name">beauty.subscription.plan.form</field>
+        <field name="model">beauty.subscription.plan</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Pro Barber Tier"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Pricing &amp; Billing">
+                            <field name="code"/>
+                            <field name="price"/>
+                            <field name="currency"/>
+                            <field name="billing_interval"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Quotas &amp; Limits">
+                            <field name="max_services"/>
+                            <field name="max_bookings_month"/>
+                        </group>
+                    </group>
+                    <group string="Feature Flags">
+                        <group>
+                            <field name="featured_listing"/>
+                            <field name="analytics_dashboard"/>
+                        </group>
+                        <group>
+                            <field name="sms_notifications"/>
+                            <field name="custom_domain"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Professional Subscription Views -->
+    <record id="view_beauty_subscription_tree" model="ir.ui.view">
+        <field name="name">beauty.subscription.tree</field>
+        <field name="model">beauty.subscription</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="status == 'trialing'"
+                  decoration-success="status == 'active'"
+                  decoration-warning="status == 'past_due'"
+                  decoration-danger="status == 'cancelled'">
+                <field name="name"/>
+                <field name="professional_id"/>
+                <field name="plan_id"/>
+                <field name="current_period_start"/>
+                <field name="current_period_end"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'active'"
+                       decoration-info="status == 'trialing'"
+                       decoration-warning="status == 'past_due'"
+                       decoration-danger="status == 'cancelled'"/>
+                <field name="auto_renew"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_beauty_subscription_form" model="ir.ui.view">
+        <field name="name">beauty.subscription.form</field>
+        <field name="model">beauty.subscription</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_renew_subscription"
+                            string="💳 Pay / Renew with Pesepay"
+                            type="object"
+                            class="oe_highlight"
+                            attrs="{'invisible': [('status', '=', 'cancelled')]}"/>
+
+                    <button name="action_activate_subscription"
+                            string="Activate Plan"
+                            type="object"
+                            class="btn-secondary"
+                            attrs="{'invisible': [('status', '=', 'active')]}"/>
+
+                    <button name="action_cancel_subscription"
+                            string="Cancel Subscription"
+                            type="object"
+                            attrs="{'invisible': [('status', '=', 'cancelled')]}"/>
+
+                    <field name="status" widget="statusbar" statusbar_visible="trialing,active,past_due,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Subscription Details">
+                            <field name="professional_id"/>
+                            <field name="plan_id"/>
+                            <field name="auto_renew"/>
+                        </group>
+                        <group string="Billing Period">
+                            <field name="current_period_start"/>
+                            <field name="current_period_end"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Pesepay Billing History">
+                            <field name="payment_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="amount"/>
+                                    <field name="currency"/>
+                                    <field name="payment_method"/>
+                                    <field name="pesepay_reference"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'paid'"
+                                           decoration-warning="state == 'pending'"
+                                           decoration-danger="state == 'failed'"/>
+                                    <field name="payment_date"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Window Actions -->
+    <record id="action_beauty_subscription" model="ir.actions.act_window">
+        <field name="name">Subscriptions</field>
+        <field name="res_model">beauty.subscription</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_beauty_subscription_plan" model="ir.actions.act_window">
+        <field name="name">Subscription Plans</field>
+        <field name="res_model">beauty.subscription.plan</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

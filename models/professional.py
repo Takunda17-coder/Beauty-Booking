@@ -87,6 +87,34 @@ class BeautyProfessional(models.Model):
         string='Services'
     )
 
+    subscription_ids = fields.One2many(
+        'beauty.subscription',
+        'professional_id',
+        string='Subscriptions'
+    )
+
+    active_subscription_id = fields.Many2one(
+        'beauty.subscription',
+        string='Active Subscription',
+        compute='_compute_active_subscription'
+    )
+
+    subscription_plan_id = fields.Many2one(
+        'beauty.subscription.plan',
+        string='Current Plan',
+        related='active_subscription_id.plan_id'
+    )
+
+    subscription_status = fields.Selection(
+        string='SaaS Status',
+        related='active_subscription_id.status'
+    )
+
+    def _compute_active_subscription(self):
+        for record in self:
+            sub = record.subscription_ids.filtered(lambda s: s.status in ('active', 'trialing'))[:1]
+            record.active_subscription_id = sub or False
+
     def _compute_booking_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for professional in self:

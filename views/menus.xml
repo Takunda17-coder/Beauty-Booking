@@ -66,4 +66,22 @@
         sequence="25"
     />
 
+    <!-- Subscriptions -->
+    <menuitem
+        id="menu_beauty_subscriptions"
+        name="Subscriptions"
+        parent="menu_beauty_root"
+        action="action_beauty_subscription"
+        sequence="30"
+    />
+
+    <!-- Subscription Plans -->
+    <menuitem
+        id="menu_beauty_subscription_plans"
+        name="Subscription Plans"
+        parent="menu_beauty_root"
+        action="action_beauty_subscription_plan"
+        sequence="35"
+    />
+
 </odoo>

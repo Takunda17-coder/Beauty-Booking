@@ -746,3 +746,87 @@ class BeautyProfessionalPortal(http.Controller):
 
         return request.redirect('/beauty/email_sandbox')
 
+    @http.route(
+        '/beauty/subscription',
+        type='http',
+        auth='public',
+        website=True,
+    )
+    def portal_subscription(self):
+        """Professional SaaS subscription and plan upgrade view."""
+        redirect = self._check_auth_or_redirect()
+        if redirect:
+            return redirect
+
+        try:
+            professional = self._get_professional()
+        except AccessError:
+            return request.render('beauty_booking.portal_access_denied')
+
+        subscription = professional.active_subscription_id
+        if not subscription:
+            # Create default Starter subscription if none exists
+            default_plan = request.env['beauty.subscription.plan'].sudo().search([
+                ('code', '=', 'starter')
+            ], limit=1)
+            if default_plan:
+                subscription = request.env['beauty.subscription'].sudo().create({
+                    'professional_id': professional.id,
+                    'plan_id': default_plan.id,
+                    'status': 'trialing',
+                })
+
+        plans = request.env['beauty.subscription.plan'].sudo().search([('active', '=', True)])
+        payments = professional.subscription_ids.mapped('payment_ids')
+
+        values = {
+            'professional': professional,
+            'subscription': subscription,
+            'plans': plans,
+            'payments': payments,
+        }
+        return request.render('beauty_booking.portal_subscription', values)
+
+    @http.route(
+        '/beauty/subscription/subscribe/<int:plan_id>',
+        type='http',
+        auth='public',
+        website=True,
+        methods=['GET', 'POST'],
+    )
+    def portal_upgrade_subscription(self, plan_id):
+        """Upgrade professional subscription tier and initiate Pesepay billing."""
+        redirect = self._check_auth_or_redirect()
+        if redirect:
+            return redirect
+
+        try:
+            professional = self._get_professional()
+        except AccessError:
+            return request.render('beauty_booking.portal_access_denied')
+
+        plan = request.env['beauty.subscription.plan'].sudo().browse(plan_id)
+        if not plan.exists():
+            return request.not_found()
+
+        subscription = professional.subscription_ids.filtered(lambda s: s.plan_id.id == plan.id)[:1]
+        if not subscription:
+            subscription = request.env['beauty.subscription'].sudo().create({
+                'professional_id': professional.id,
+                'plan_id': plan.id,
+                'status': 'trialing' if plan.price == 0 else 'past_due',
+            })
+        else:
+            subscription.write({'plan_id': plan.id})
+
+        if plan.price <= 0:
+            subscription.action_activate_subscription()
+            return request.redirect('/beauty/subscription')
+
+        action = subscription.action_renew_subscription()
+        url = action.get('url') if isinstance(action, dict) else False
+        if url:
+            return request.redirect(url)
+        return request.redirect('/beauty/subscription')
+
+
