@@ -16,7 +16,8 @@ _logger = logging.getLogger(__name__)
 
 # Pesepay Sandbox & Production Base URLs
 PESEPAY_SANDBOX_BASE_URL = "https://api.pesepay.com"
-PESEPAY_MAKE_PAYMENT_PATH = "/api/payments-engine/v2/payments/make-payment"
+PESEPAY_INITIATE_PATH = "/api/payments-engine/v1/payments/initiate"
+PESEPAY_MAKE_PAYMENT_PATH = "/api/payments-engine/v1/payments/make-payment"
 PESEPAY_CHECK_PAYMENT_PATH = "/api/payments-engine/v1/payments/check-payment"
 
 # Sandbox Default Credentials (can be overridden via ir.config_parameter)
@@ -96,8 +97,9 @@ class PesepayClient:
         customer_name=None,
         customer_phone=None,
         customer_email=None,
+        payment_method=None,
     ):
-        """Initiates a payment request with Pesepay sandbox.
+        """Initiates a payment request with Pesepay sandbox via redirect integration.
 
         :return: dict with keys: 'success', 'redirect_url', 'poll_url', 'reference_number', 'raw_response', 'error'
         """
@@ -116,17 +118,19 @@ class PesepayClient:
                 "email": customer_email or "",
             },
         }
+        if payment_method:
+            payload_data["paymentMethod"] = payment_method
 
         try:
             encrypted_payload = self.encrypt_payload(payload_data)
-            url = f"{self.base_url}{PESEPAY_MAKE_PAYMENT_PATH}"
+            url = f"{self.base_url}{PESEPAY_INITIATE_PATH}"
             headers = {
-                "Authorization": self.integration_key,
+                "authorization": self.integration_key,
                 "Content-Type": "application/json",
             }
             body = {"payload": encrypted_payload}
 
-            _logger.info("Initiating Pesepay payment for ref %s (amount: %s %s)", merchant_reference, amount, currency_code)
+            _logger.info("Initiating Pesepay payment for ref %s (amount: %s %s) to %s", merchant_reference, amount, currency_code, url)
             response = requests.post(url, json=body, headers=headers, timeout=15)
 
             if response.status_code in (200, 201):
@@ -183,7 +187,7 @@ class PesepayClient:
         try:
             url = f"{self.base_url}{PESEPAY_CHECK_PAYMENT_PATH}"
             headers = {
-                "Authorization": self.integration_key,
+                "authorization": self.integration_key,
                 "Content-Type": "application/json",
             }
             params = {"referenceNumber": reference_number}

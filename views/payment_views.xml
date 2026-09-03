@@ -41,7 +41,8 @@
                             string="Pay via Pesepay"
                             type="object"
                             class="oe_highlight"
-                            attrs="{'invisible': [('state', 'in', ('paid', 'cancelled'))]}"/>
+                            attrs="{'invisible': [('state', 'in', ('paid', 'cancelled'))]}"
+                            confirm="Are you sure you want to initiate payment via Pesepay?"/>
 
                     <button name="action_check_status"
                             string="Check Status with Pesepay"

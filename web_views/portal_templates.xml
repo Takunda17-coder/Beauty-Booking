@@ -344,6 +344,53 @@
                     <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'dashboard'"/></t>
 
                     <div class="container portal-wrap">
+                        <!-- Transaction Status Pop-up Modal -->
+                        <t t-if="message or error">
+                            <div class="modal fade" id="transactionStatusModal" tabindex="-1" aria-labelledby="txnModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+                                    <div class="modal-content border-0 rounded-4 shadow-lg text-center p-4" style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color) !important;">
+                                        <div class="modal-body p-2">
+                                            <t t-if="not error">
+                                                <div class="mb-3 mx-auto d-flex align-items-center justify-content-center" 
+                                                     style="width: 76px; height: 76px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 2.8rem;">
+                                                    <i class="fa fa-check-circle"/>
+                                                </div>
+                                                <h4 class="fw-bold mb-2" id="txnModalLabel" style="color: var(--text-main);">Transaction Successful!</h4>
+                                                <p class="mb-4" style="color: var(--text-muted); font-size: 0.92rem;"><t t-esc="message"/></p>
+                                                
+                                                <div class="p-3 rounded-3 text-start mb-4" style="background: var(--input-bg); border: 1px solid var(--border-color);">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <span class="small" style="color: var(--text-muted);">Payment Status</span>
+                                                        <span class="badge bg-success rounded-pill px-3 py-1">Paid &amp; Active</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center mb-2" t-if="txn_ref">
+                                                        <span class="small" style="color: var(--text-muted);">Payment Ref</span>
+                                                        <span class="small fw-semibold font-monospace" style="color: var(--accent);"><t t-esc="txn_ref"/></span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="small" style="color: var(--text-muted);">Gateway</span>
+                                                        <span class="small fw-semibold" style="color: var(--text-main);"><i class="fa fa-shield text-primary me-1"/>Pesepay Sandbox</span>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="mb-3 mx-auto d-flex align-items-center justify-content-center" 
+                                                     style="width: 76px; height: 76px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); color: #ef4444; font-size: 2.8rem;">
+                                                    <i class="fa fa-exclamation-circle"/>
+                                                </div>
+                                                <h4 class="fw-bold mb-2" id="txnModalLabel" style="color: var(--text-main);">Transaction Notice</h4>
+                                                <p class="mb-4" style="color: var(--text-muted); font-size: 0.92rem;"><t t-esc="error"/></p>
+                                            </t>
+
+                                            <button type="button" class="btn-accent w-100 py-2 rounded-pill" data-bs-dismiss="modal">
+                                                Continue to Dashboard
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
                         <div class="hero-card">
                             <div class="row align-items-center">
                                 <div class="col-lg-8">
@@ -490,6 +537,18 @@
                             document.documentElement.setAttribute('data-theme', saved);
                             window.addEventListener('DOMContentLoaded', () => updateThemeIcon(saved));
                         })();
+                        // Automatically show transaction status pop-up if present, and clean the URL
+                        window.addEventListener('DOMContentLoaded', function() {
+                            const txnModalEl = document.getElementById('transactionStatusModal');
+                            if (txnModalEl &amp;&amp; typeof bootstrap !== 'undefined') {
+                                const txnModal = new bootstrap.Modal(txnModalEl);
+                                txnModal.show();
+                                // Clean up the URL parameters so the transaction message doesn't linger in the address bar
+                                if (window.history &amp;&amp; window.history.replaceState) {
+                                    window.history.replaceState({}, document.title, window.location.pathname);
+                                }
+                            }
+                        });
                     </script>
                     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
                 </body>
@@ -1754,136 +1813,571 @@
 
         <!-- Subscription Management Template -->
         <template id="portal_subscription" name="Professional SaaS Subscription">
-            <t t-call="beauty_booking.portal_layout">
-                <t t-set="active_page" t-value="'subscription'"/>
-                <div class="content-container">
-                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                        <div>
-                            <h2 class="fw-bolder mb-1" style="color: var(--text-main);">Subscription &amp; SaaS Billing</h2>
-                            <p class="mb-0" style="color: var(--text-muted);">Manage your platform membership tier and Pesepay billing.</p>
+            <html>
+                <head>
+                    <meta charset="utf-8"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                    <title>Subscription &amp; SaaS Billing - Beauty Booking</title>
+                    <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css"/>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+                    <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
+                    <style>
+                        :root, [data-theme="light"] {
+                            --bg-main: #f8fafc;
+                            --bg-card: #ffffff;
+                            --border-color: #e2e8f0;
+                            --text-main: #0f172a;
+                            --text-muted: #64748b;
+                            --accent: #6366f1;
+                            --accent-hover: #4f46e5;
+                            --input-bg: #f8fafc;
+                        }
+                        [data-theme="dark"] {
+                            --bg-main: #0b0f19;
+                            --bg-card: #111827;
+                            --border-color: #1f2937;
+                            --text-main: #f9fafb;
+                            --text-muted: #9ca3af;
+                            --accent: #818cf8;
+                            --accent-hover: #6366f1;
+                            --input-bg: #1f2937;
+                        }
+                        body {
+                            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+                            background-color: var(--bg-main);
+                            color: var(--text-main);
+                            min-height: 100vh;
+                            margin: 0;
+                            transition: background-color 0.3s ease, color 0.3s ease;
+                        }
+                        .site-nav {
+                            background-color: var(--bg-card);
+                            border-bottom: 1px solid var(--border-color);
+                            padding: 0.9rem 0;
+                        }
+                        .site-nav .brand {
+                            font-weight: 800;
+                            font-size: 1.2rem;
+                            color: var(--text-main);
+                            text-decoration: none;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                        .brand-icon-box {
+                            width: 38px;
+                            height: 38px;
+                            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+                            color: #ffffff;
+                            border-radius: 10px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 1.1rem;
+                        }
+                        .nav-link-item {
+                            color: var(--text-muted);
+                            text-decoration: none;
+                            font-weight: 600;
+                            font-size: 0.92rem;
+                            padding: 0.5rem 0.9rem;
+                            border-radius: 999px;
+                            transition: all 0.2s ease;
+                        }
+                        .nav-link-item:hover, .nav-link-item.active {
+                            color: var(--text-main);
+                            background-color: var(--input-bg);
+                        }
+                        .theme-toggle-btn {
+                            background: transparent;
+                            border: 1.5px solid var(--border-color);
+                            color: var(--text-main);
+                            width: 38px;
+                            height: 38px;
+                            border-radius: 50%;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            cursor: pointer;
+                        }
+                        .portal-wrap { padding: 32px 0 50px; }
+                        .minimal-card {
+                            background-color: var(--bg-card);
+                            border: 1px solid var(--border-color);
+                            border-radius: 18px;
+                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+                        }
+                        .btn-accent {
+                            background-color: var(--accent);
+                            color: #ffffff !important;
+                            border: none;
+                            border-radius: 999px;
+                            padding: 0 1.4rem;
+                            height: 42px;
+                            font-weight: 700;
+                            font-size: 0.92rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            cursor: pointer;
+                            text-decoration: none;
+                            transition: background-color 0.2s ease;
+                        }
+                        .btn-accent:hover { background-color: var(--accent-hover); }
+                        .btn-secondary-custom {
+                            background-color: var(--input-bg);
+                            border: 1.5px solid var(--border-color);
+                            color: var(--text-main) !important;
+                            border-radius: 999px;
+                            padding: 0 1.4rem;
+                            height: 42px;
+                            font-weight: 600;
+                            font-size: 0.92rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            cursor: pointer;
+                            text-decoration: none;
+                        }
+                        /* Minimalist Table */
+                        .table-minimal { width: 100%; margin-bottom: 0; color: var(--text-main); border-collapse: separate; border-spacing: 0; }
+                        .table-minimal th { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); background: transparent; border-bottom: 1px solid var(--border-color); padding: 0.85rem 1rem; }
+                        .table-minimal td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid var(--border-color); color: var(--text-main); background: transparent; }
+                        .table-minimal tr:last-child td { border-bottom: none; }
+                        .table-minimal tbody tr:hover { background-color: var(--input-bg); }
+                        @media (max-width: 767.98px) {
+                            .portal-wrap { padding: 18px 12px 40px !important; }
+                            .minimal-card { border-radius: 16px !important; }
+                            .minimal-card .card-body { padding: 1.2rem !important; }
+                            .table-minimal th, .table-minimal td { padding: 0.75rem 0.5rem !important; font-size: 0.85rem; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <t t-call="beauty_booking.portal_nav"><t t-set="active_page" t-value="'subscription'"/></t>
+
+                    <div class="container portal-wrap">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                            <div>
+                                <h2 class="fw-bolder mb-1" style="color: var(--text-main);">Subscription &amp; SaaS Billing</h2>
+                                <p class="mb-0" style="color: var(--text-muted);">Manage your platform membership tier and Pesepay billing.</p>
+                            </div>
+                            <t t-if="subscription">
+                                <span class="badge rounded-pill px-3 py-2 fs-6" 
+                                      t-att-style="'background: ' + ('#10b981' if subscription.status == 'active' else ('#f59e0b' if subscription.status == 'trialing' else '#ef4444')) + '; color: #fff;'">
+                                    Status: <t t-esc="subscription.status.title()"/>
+                                </span>
+                            </t>
                         </div>
+
+                        <!-- Current Subscription Overview Card -->
                         <t t-if="subscription">
-                            <span class="badge rounded-pill px-3 py-2 fs-6" 
-                                  t-att-style="'background: ' + ('#10b981' if subscription.status == 'active' else ('#f59e0b' if subscription.status == 'trialing' else '#ef4444')) + '; color: #fff;'">
-                                Status: <t t-esc="subscription.status.title()"/>
-                            </span>
-                        </t>
-                    </div>
+                            <div class="card minimal-card mb-4">
+                                <div class="card-body p-4">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-7">
+                                            <div class="small fw-bold text-uppercase mb-1" style="color: var(--accent); font-size: 0.78rem; letter-spacing: 0.06em;">Active Membership</div>
+                                            <h3 class="fw-bold mb-2" style="color: var(--text-main);"><t t-esc="subscription.plan_id.name"/></h3>
+                                            <p class="small mb-3" style="color: var(--text-muted);"><t t-esc="subscription.plan_id.description"/></p>
+                                            <div class="d-flex flex-wrap gap-4 small" style="color: var(--text-muted);">
+                                                <span><i class="fa fa-calendar me-1"/> Next Renewal: <strong style="color: var(--text-main);"><t t-esc="subscription.current_period_end.strftime('%Y-%m-%d') if subscription.current_period_end else '—'"/></strong></span>
+                                                <span><i class="fa fa-refresh me-1"/> Auto-Renew: <strong style="color: var(--text-main);"><t t-esc="'Active' if subscription.auto_renew else 'Disabled'"/></strong></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                                            <div class="fs-2 fw-bolder mb-2" style="color: var(--text-main);">
+                                                $<t t-esc="'{:.2f}'.format(subscription.plan_id.price)"/>
+                                                <span class="fs-6 fw-normal" style="color: var(--text-muted);">/<t t-esc="subscription.plan_id.billing_interval"/></span>
+                                            </div>
+                                            <t t-if="subscription.plan_id.price &gt; 0 and subscription.status != 'cancelled'">
+                                                <button type="button" class="btn-accent" data-bs-toggle="modal" t-att-data-bs-target="'#renewSubModal' + str(subscription.id)">
+                                                    <i class="fa fa-credit-card me-1"/> Pay / Renew via Pesepay
+                                                </button>
 
-                    <!-- Current Subscription Overview Card -->
-                    <t t-if="subscription">
-                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-5" style="background: var(--bg-card); border: 1px solid var(--border-color) !important;">
-                            <div class="row align-items-center">
-                                <div class="col-md-7">
-                                    <div class="small fw-bold text-uppercase text-primary mb-1">Current Membership</div>
-                                    <h3 class="fw-bold mb-2" style="color: var(--text-main);"><t t-esc="subscription.plan_id.name"/></h3>
-                                    <p class="small text-muted mb-2"><t t-esc="subscription.plan_id.description"/></p>
-                                    <div class="d-flex gap-4 small text-muted">
-                                        <span><i class="fa fa-calendar me-1"/> Renewal: <strong><t t-esc="subscription.current_period_end"/></strong></span>
-                                        <span><i class="fa fa-refresh me-1"/> Auto-Renew: <strong><t t-esc="'Enabled' if subscription.auto_renew else 'Disabled'"/></strong></span>
+                                                <!-- Renewal Confirmation Dialog Modal -->
+                                                <div class="modal fade text-start" t-att-id="'renewSubModal' + str(subscription.id)" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content border-0 rounded-4 shadow-lg" style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color) !important;">
+                                                            <div class="modal-header border-bottom px-4 pt-4 pb-3" style="border-color: var(--border-color) !important;">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <div style="width:36px; height:36px; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color:#fff; border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                                                                        <i class="fa fa-shield"/>
+                                                                    </div>
+                                                                    <div>
+                                                                        <h5 class="modal-title fw-bold mb-0" style="color: var(--text-main);">Confirm Membership Renewal</h5>
+                                                                        <div class="small" style="color: var(--text-muted); font-size: 0.78rem;">Pesepay Sandbox Billing</div>
+                                                                    </div>
+                                                                </div>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <form method="post" t-att-action="'/beauty/subscription/subscribe/' + str(subscription.plan_id.id)">
+                                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                <div class="modal-body p-4">
+                                                                    <!-- Confirmation Alert -->
+                                                                    <div class="alert rounded-3 mb-3 p-3" style="background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main);">
+                                                                        <div class="d-flex justify-content-between align-items-center">
+                                                                            <div>
+                                                                                <div class="small fw-bold text-uppercase" style="color: var(--accent); font-size: 0.72rem; letter-spacing: 0.05em;">Membership Tier</div>
+                                                                                <div class="fw-bold" style="color: var(--text-main);"><t t-esc="subscription.plan_id.name"/></div>
+                                                                            </div>
+                                                                            <div class="fs-4 fw-bolder text-success">
+                                                                                $<t t-esc="'{:.2f}'.format(subscription.plan_id.price)"/>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="small mt-2 pt-2 border-top" style="border-color: var(--border-color) !important; color: var(--text-muted);">
+                                                                            <i class="fa fa-info-circle me-1 text-primary"/> Please select your payment method and confirm your details below to avoid accidental renewal charges.
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Payment Method Selector -->
+                                                                    <label class="form-label small fw-bold text-uppercase" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.05em;">Select Payment Method</label>
+                                                                    <div class="row g-2 mb-3">
+                                                                        <div class="col-4">
+                                                                            <label class="payment-method-card text-center p-2 rounded-3 w-100 d-block border" t-att-id="'sub_card_ecocash_' + str(subscription.id)" style="cursor: pointer; background: var(--input-bg); border-color: var(--accent) !important;">
+                                                                                <input type="radio" name="payment_method" value="ecocash" checked="checked" class="d-none" t-att-onchange="'updateSubFields(' + str(subscription.id) + ', \'ecocash\')'"/>
+                                                                                <i class="fa fa-mobile d-block fs-3 mb-1" style="color: #0284c7;"/>
+                                                                                <span class="small fw-bold d-block" style="font-size: 0.8rem; color: var(--text-main);">EcoCash</span>
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-4">
+                                                                            <label class="payment-method-card text-center p-2 rounded-3 w-100 d-block border" t-att-id="'sub_card_onemoney_' + str(subscription.id)" style="cursor: pointer; background: var(--input-bg); border-color: var(--border-color);">
+                                                                                <input type="radio" name="payment_method" value="onemoney" class="d-none" t-att-onchange="'updateSubFields(' + str(subscription.id) + ', \'onemoney\')'"/>
+                                                                                <i class="fa fa-mobile d-block fs-3 mb-1" style="color: #ea580c;"/>
+                                                                                <span class="small fw-bold d-block" style="font-size: 0.8rem; color: var(--text-main);">OneMoney</span>
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-4">
+                                                                            <label class="payment-method-card text-center p-2 rounded-3 w-100 d-block border" t-att-id="'sub_card_visa_' + str(subscription.id)" style="cursor: pointer; background: var(--input-bg); border-color: var(--border-color);">
+                                                                                <input type="radio" name="payment_method" value="card" class="d-none" t-att-onchange="'updateSubFields(' + str(subscription.id) + ', \'card\')'"/>
+                                                                                <i class="fa fa-credit-card d-block fs-4 mb-1 mt-1" style="color: #4338ca;"/>
+                                                                                <span class="small fw-bold d-block" style="font-size: 0.8rem; color: var(--text-main);">Visa / Card</span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Dynamic Phone / Account Input -->
+                                                                    <div class="mb-3" t-att-id="'sub_phone_group_' + str(subscription.id)">
+                                                                        <label class="form-label small fw-semibold" t-att-id="'sub_phone_label_' + str(subscription.id)" style="color: var(--text-main);">EcoCash Mobile Number *</label>
+                                                                        <input type="tel" name="phone" t-att-id="'sub_phone_input_' + str(subscription.id)" class="form-control" t-att-value="professional.phone or ''" placeholder="e.g. 0771234567" required="required" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);"/>
+                                                                        <div class="form-text small" t-att-id="'sub_phone_helper_' + str(subscription.id)" style="color: var(--text-muted);">A USSD push prompt will be sent to your phone to authorize payment.</div>
+                                                                    </div>
+
+                                                                    <div class="row g-2 mb-2">
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label small fw-semibold" style="color: var(--text-main);">Billing Name</label>
+                                                                            <input type="text" name="name" class="form-control" t-att-value="professional.name or ''" placeholder="Full Name" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);"/>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label small fw-semibold" style="color: var(--text-main);">Billing Email</label>
+                                                                            <input type="email" name="email" class="form-control" t-att-value="professional.email or ''" placeholder="name@example.com" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);"/>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer border-top px-4 py-3" style="border-color: var(--border-color) !important;">
+                                                                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                                                        <i class="fa fa-lock me-1"/> Confirm &amp; Pay $<t t-esc="'{:.2f}'.format(subscription.plan_id.price)"/>
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-5 text-md-end mt-3 mt-md-0">
-                                    <div class="fs-2 fw-bolder text-success mb-2">
-                                        $<t t-esc="'{:.2f}'.format(subscription.plan_id.price)"/>
-                                        <span class="fs-6 text-muted fw-normal">/<t t-esc="subscription.plan_id.billing_interval"/></span>
-                                    </div>
-                                    <t t-if="subscription.plan_id.price &gt; 0 and subscription.status != 'cancelled'">
-                                        <a t-att-href="'/beauty/subscription/subscribe/' + str(subscription.plan_id.id)" class="btn btn-primary rounded-pill px-4 py-2">
-                                            <i class="fa fa-credit-card me-1"/> Pay / Renew via Pesepay
-                                        </a>
-                                    </t>
                                 </div>
                             </div>
-                        </div>
-                    </t>
+                        </t>
 
-                    <!-- SaaS Pricing Tiers Grid -->
-                    <h4 class="fw-bold mb-3" style="color: var(--text-main);">Available Platform Plans</h4>
-                    <div class="row g-4 mb-5">
-                        <t t-foreach="plans" t-as="plan">
-                            <div class="col-lg-4 col-md-6">
-                                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 position-relative" 
-                                     t-att-style="'background: var(--bg-card); border: 1.5px solid ' + ('var(--accent)' if subscription and subscription.plan_id.id == plan.id else 'var(--border-color)') + ' !important;'">
-                                    
-                                    <t t-if="subscription and subscription.plan_id.id == plan.id">
-                                        <span class="position-absolute top-0 end-0 translate-middle-y me-3 badge bg-primary rounded-pill px-3 py-1">Your Plan</span>
-                                    </t>
-                                    
-                                    <h5 class="fw-bold mb-1" style="color: var(--text-main);"><t t-esc="plan.name"/></h5>
-                                    <p class="small text-muted mb-3"><t t-esc="plan.description"/></p>
-                                    
-                                    <div class="fs-3 fw-bolder mb-3" style="color: var(--text-main);">
-                                        $<t t-esc="'{:.2f}'.format(plan.price)"/>
-                                        <span class="fs-6 text-muted fw-normal">/<t t-esc="plan.billing_interval"/></span>
-                                    </div>
-
-                                    <ul class="list-unstyled small mb-4 flex-grow-1" style="color: var(--text-main);">
-                                        <li class="mb-2"><i class="fa fa-check text-success me-2"/> <t t-esc="'Unlimited services' if plan.max_services == 0 else f'Up to {plan.max_services} services'"/></li>
-                                        <li class="mb-2"><i class="fa fa-check text-success me-2"/> <t t-esc="'Unlimited monthly bookings' if plan.max_bookings_month == 0 else f'Up to {plan.max_bookings_month} bookings/month'"/></li>
-                                        <li class="mb-2" t-if="plan.featured_listing"><i class="fa fa-check text-success me-2"/> Featured Search Placement</li>
-                                        <li class="mb-2" t-if="plan.analytics_dashboard"><i class="fa fa-check text-success me-2"/> Revenue Analytics Dashboard</li>
-                                        <li class="mb-2" t-if="plan.sms_notifications"><i class="fa fa-check text-success me-2"/> Automated SMS Reminders</li>
-                                    </ul>
-
-                                    <div class="mt-auto">
+                        <!-- SaaS Pricing Tiers Grid -->
+                        <h4 class="fw-bold mb-3 mt-4" style="color: var(--text-main);">Available Platform Plans</h4>
+                        <div class="row g-4 mb-4">
+                            <t t-foreach="plans" t-as="plan">
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="card minimal-card h-100 p-4 position-relative" 
+                                         t-att-style="'border-color: ' + ('var(--accent)' if subscription and subscription.plan_id.id == plan.id else 'var(--border-color)') + ' !important;'">
+                                        
                                         <t t-if="subscription and subscription.plan_id.id == plan.id">
-                                            <button class="btn btn-outline-secondary w-100 rounded-pill py-2" disabled="disabled">Current Plan</button>
+                                            <span class="position-absolute top-0 end-0 translate-middle-y me-3 badge bg-primary rounded-pill px-3 py-1" style="background-color: var(--accent) !important;">Current Plan</span>
                                         </t>
-                                        <t t-else="">
-                                            <a t-att-href="'/beauty/subscription/subscribe/' + str(plan.id)" class="btn btn-primary w-100 rounded-pill py-2 text-white text-decoration-none">
-                                                <i class="fa fa-arrow-up me-1"/> <t t-esc="'Switch to Plan' if plan.price == 0 else f'Upgrade via Pesepay (${plan.price:.0f})'"/>
-                                            </a>
-                                        </t>
+                                        
+                                        <h5 class="fw-bold mb-1" style="color: var(--text-main);"><t t-esc="plan.name"/></h5>
+                                        <p class="small mb-3" style="color: var(--text-muted);"><t t-esc="plan.description"/></p>
+                                        
+                                        <div class="fs-3 fw-bolder mb-3" style="color: var(--text-main);">
+                                            $<t t-esc="'{:.2f}'.format(plan.price)"/>
+                                            <span class="fs-6 fw-normal" style="color: var(--text-muted);">/<t t-esc="plan.billing_interval"/></span>
+                                        </div>
+
+                                        <ul class="list-unstyled small mb-4 flex-grow-1" style="color: var(--text-main);">
+                                            <li class="mb-2">
+                                                <i class="fa fa-check text-success me-2"/>
+                                                <t t-if="plan.max_services == 0">Unlimited services</t>
+                                                <t t-else="">Up to <t t-esc="plan.max_services"/> services</t>
+                                            </li>
+                                            <li class="mb-2">
+                                                <i class="fa fa-check text-success me-2"/>
+                                                <t t-if="plan.max_bookings_month == 0">Unlimited monthly bookings</t>
+                                                <t t-else="">Up to <t t-esc="plan.max_bookings_month"/> bookings/month</t>
+                                            </li>
+                                            <li class="mb-2" t-if="plan.featured_listing"><i class="fa fa-check text-success me-2"/> Featured Search Placement</li>
+                                            <li class="mb-2" t-if="plan.analytics_dashboard"><i class="fa fa-check text-success me-2"/> Revenue Analytics Dashboard</li>
+                                            <li class="mb-2" t-if="plan.sms_notifications"><i class="fa fa-check text-success me-2"/> Automated SMS Reminders</li>
+                                        </ul>
+
+                                        <div class="mt-auto">
+                                            <t t-if="subscription and subscription.plan_id.id == plan.id">
+                                                <button class="btn-secondary-custom w-100" disabled="disabled">Current Plan</button>
+                                            </t>
+                                            <t t-elif="plan.price == 0">
+                                                <form method="post" t-att-action="'/beauty/subscription/subscribe/' + str(plan.id)">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <button type="submit" class="btn-secondary-custom w-100" onclick="return confirm('Switch to the free Starter plan?');">
+                                                        <i class="fa fa-arrow-up me-1"/> Switch to Plan
+                                                    </button>
+                                                </form>
+                                            </t>
+                                            <t t-else="">
+                                                <button type="button" class="btn-accent w-100" data-bs-toggle="modal" t-att-data-bs-target="'#planModal' + str(plan.id)">
+                                                    <i class="fa fa-arrow-up me-1"/> Upgrade via Pesepay ($<t t-esc="'%.0f' % plan.price"/>)
+                                                </button>
+
+                                                <!-- Plan Upgrade Confirmation Dialog Modal -->
+                                                <div class="modal fade text-start" t-att-id="'planModal' + str(plan.id)" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content border-0 rounded-4 shadow-lg" style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color) !important;">
+                                                            <div class="modal-header border-bottom px-4 pt-4 pb-3" style="border-color: var(--border-color) !important;">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <div style="width:36px; height:36px; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color:#fff; border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                                                                        <i class="fa fa-shield"/>
+                                                                    </div>
+                                                                    <div>
+                                                                        <h5 class="modal-title fw-bold mb-0" style="color: var(--text-main);">Confirm Plan Subscription</h5>
+                                                                        <div class="small" style="color: var(--text-muted); font-size: 0.78rem;">Pesepay SaaS Billing</div>
+                                                                    </div>
+                                                                </div>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <form method="post" t-att-action="'/beauty/subscription/subscribe/' + str(plan.id)">
+                                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                <div class="modal-body p-4">
+                                                                    <!-- Order Confirmation Alert -->
+                                                                    <div class="alert rounded-3 mb-3 p-3" style="background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main);">
+                                                                        <div class="d-flex justify-content-between align-items-center">
+                                                                            <div>
+                                                                                <div class="small fw-bold text-uppercase" style="color: var(--accent); font-size: 0.72rem; letter-spacing: 0.05em;">Selected Plan</div>
+                                                                                <div class="fw-bold" style="color: var(--text-main);"><t t-esc="plan.name"/></div>
+                                                                                <div class="small" style="color: var(--text-muted);"><t t-esc="plan.billing_interval.title()"/> Membership</div>
+                                                                            </div>
+                                                                            <div class="fs-4 fw-bolder text-success">
+                                                                                $<t t-esc="'{:.2f}'.format(plan.price)"/>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="small mt-2 pt-2 border-top" style="border-color: var(--border-color) !important; color: var(--text-muted);">
+                                                                            <i class="fa fa-info-circle me-1 text-primary"/> Please select your payment method and confirm your details below to prevent accidental charges.
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Payment Method Selector -->
+                                                                    <label class="form-label small fw-bold text-uppercase" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.05em;">Select Payment Method</label>
+                                                                    <div class="row g-2 mb-3">
+                                                                        <div class="col-4">
+                                                                            <label class="payment-method-card text-center p-2 rounded-3 w-100 d-block border" t-att-id="'plan_card_ecocash_' + str(plan.id)" style="cursor: pointer; background: var(--input-bg); border-color: var(--accent) !important;">
+                                                                                <input type="radio" name="payment_method" value="ecocash" checked="checked" class="d-none" t-att-onchange="'updatePlanFields(' + str(plan.id) + ', \'ecocash\')'"/>
+                                                                                <i class="fa fa-mobile d-block fs-3 mb-1" style="color: #0284c7;"/>
+                                                                                <span class="small fw-bold d-block" style="font-size: 0.8rem; color: var(--text-main);">EcoCash</span>
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-4">
+                                                                            <label class="payment-method-card text-center p-2 rounded-3 w-100 d-block border" t-att-id="'plan_card_onemoney_' + str(plan.id)" style="cursor: pointer; background: var(--input-bg); border-color: var(--border-color);">
+                                                                                <input type="radio" name="payment_method" value="onemoney" class="d-none" t-att-onchange="'updatePlanFields(' + str(plan.id) + ', \'onemoney\')'"/>
+                                                                                <i class="fa fa-mobile d-block fs-3 mb-1" style="color: #ea580c;"/>
+                                                                                <span class="small fw-bold d-block" style="font-size: 0.8rem; color: var(--text-main);">OneMoney</span>
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="col-4">
+                                                                            <label class="payment-method-card text-center p-2 rounded-3 w-100 d-block border" t-att-id="'plan_card_visa_' + str(plan.id)" style="cursor: pointer; background: var(--input-bg); border-color: var(--border-color);">
+                                                                                <input type="radio" name="payment_method" value="card" class="d-none" t-att-onchange="'updatePlanFields(' + str(plan.id) + ', \'card\')'"/>
+                                                                                <i class="fa fa-credit-card d-block fs-4 mb-1 mt-1" style="color: #4338ca;"/>
+                                                                                <span class="small fw-bold d-block" style="font-size: 0.8rem; color: var(--text-main);">Visa / Card</span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Dynamic Phone / Account Input -->
+                                                                    <div class="mb-3" t-att-id="'plan_phone_group_' + str(plan.id)">
+                                                                        <label class="form-label small fw-semibold" t-att-id="'plan_phone_label_' + str(plan.id)" style="color: var(--text-main);">EcoCash Mobile Number *</label>
+                                                                        <input type="tel" name="phone" t-att-id="'plan_phone_input_' + str(plan.id)" class="form-control" t-att-value="professional.phone or ''" placeholder="e.g. 0771234567" required="required" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);"/>
+                                                                        <div class="form-text small" t-att-id="'plan_phone_helper_' + str(plan.id)" style="color: var(--text-muted);">A USSD prompt will be sent to your phone to authorize payment.</div>
+                                                                    </div>
+
+                                                                    <div class="row g-2 mb-2">
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label small fw-semibold" style="color: var(--text-main);">Billing Name</label>
+                                                                            <input type="text" name="name" class="form-control" t-att-value="professional.name or ''" placeholder="Full Name" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);"/>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label small fw-semibold" style="color: var(--text-main);">Billing Email</label>
+                                                                            <input type="email" name="email" class="form-control" t-att-value="professional.email or ''" placeholder="name@example.com" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);"/>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer border-top px-4 py-3" style="border-color: var(--border-color) !important;">
+                                                                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                                                        <i class="fa fa-lock me-1"/> Confirm &amp; Upgrade ($<t t-esc="'{:.2f}'.format(plan.price)"/>)
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </t>
-                    </div>
+                            </t>
+                        </div>
 
-                    <!-- Billing History Table -->
-                    <h4 class="fw-bold mb-3" style="color: var(--text-main);">Pesepay Subscription Billing History</h4>
-                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: var(--bg-card); border: 1px solid var(--border-color) !important;">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead style="background: var(--input-bg);">
-                                    <tr>
-                                        <th class="ps-4">Reference</th>
-                                        <th>Date</th>
-                                        <th>Amount</th>
-                                        <th>Method</th>
-                                        <th>Gateway Ref</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <t t-if="payments">
-                                        <t t-foreach="payments" t-as="pay">
-                                            <tr>
-                                                <td class="ps-4 fw-bold font-monospace text-primary"><t t-esc="pay.name"/></td>
-                                                <td><t t-esc="pay.payment_date or pay.create_date"/></td>
-                                                <td class="fw-bold text-success">$<t t-esc="'{:.2f}'.format(pay.amount)"/></td>
-                                                <td><span class="badge bg-secondary rounded-pill"><t t-esc="pay.payment_method.upper()"/></span></td>
-                                                <td class="small font-monospace text-muted"><t t-esc="pay.pesepay_reference or 'Pending'"/></td>
-                                                <td>
-                                                    <span t-att-class="'badge rounded-pill ' + ('bg-success' if pay.state == 'paid' else ('bg-warning text-dark' if pay.state == 'pending' else 'bg-danger'))">
-                                                        <t t-esc="pay.state.title()"/>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        </t>
-                                    </t>
-                                    <t t-if="not payments">
-                                        <tr>
-                                            <td colspan="6" class="text-center py-4 text-muted">No subscription payments recorded yet.</td>
-                                        </tr>
-                                    </t>
-                                </tbody>
-                            </table>
+                        <!-- Billing History Table (Minimalist Styling) -->
+                        <div class="card minimal-card mt-4">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0" style="color: var(--text-main);">Billing &amp; Payment History</h5>
+                                <span class="small fw-semibold" style="color: var(--text-muted);" t-if="payments">
+                                    <t t-esc="len(payments)"/> Transactions
+                                </span>
+                            </div>
+                            <div class="card-body px-4 pb-4">
+                                <t t-if="payments">
+                                    <div class="table-responsive">
+                                        <table class="table-minimal">
+                                            <thead>
+                                                <tr>
+                                                    <th>Payment Ref</th>
+                                                    <th>Date</th>
+                                                    <th>Amount</th>
+                                                    <th>Method</th>
+                                                    <th>Gateway Ref</th>
+                                                    <th class="text-end">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="payments" t-as="pay">
+                                                    <td class="fw-semibold font-monospace" style="color: var(--accent); font-size: 0.9rem;">
+                                                        <t t-esc="pay.name"/>
+                                                    </td>
+                                                    <td style="color: var(--text-muted); font-size: 0.88rem;">
+                                                        <t t-esc="pay.payment_date or (pay.create_date.strftime('%Y-%m-%d %H:%M') if pay.create_date else '—')"/>
+                                                    </td>
+                                                    <td class="fw-bold" style="color: var(--text-main);">
+                                                        $<t t-esc="'{:.2f}'.format(pay.amount)"/>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-secondary rounded-pill px-3 py-1 text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.04em;">
+                                                            <t t-esc="pay.payment_method"/>
+                                                        </span>
+                                                    </td>
+                                                    <td class="small font-monospace" style="color: var(--text-muted);">
+                                                        <t t-esc="pay.pesepay_reference or '—'"/>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <span t-if="pay.state == 'paid'" class="badge bg-success rounded-pill px-3 py-1" style="font-size: 0.75rem;">Paid</span>
+                                                        <span t-elif="pay.state == 'pending'" class="badge bg-warning text-dark rounded-pill px-3 py-1" style="font-size: 0.75rem;">Pending</span>
+                                                        <span t-elif="pay.state == 'failed'" class="badge bg-danger rounded-pill px-3 py-1" style="font-size: 0.75rem;">Failed</span>
+                                                        <span t-else="" class="badge bg-secondary rounded-pill px-3 py-1" style="font-size: 0.75rem;"><t t-esc="pay.state.title()"/></span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="mb-0 py-3" style="color: var(--text-muted);">No subscription payments recorded yet.</p>
+                                </t>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </t>
+
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                    <script>
+                        function toggleTheme() {
+                            const html = document.documentElement;
+                            const current = html.getAttribute('data-theme') || 'light';
+                            const next = current === 'dark' ? 'light' : 'dark';
+                            html.setAttribute('data-theme', next);
+                            localStorage.setItem('theme', next);
+                            updateThemeIcons(next);
+                        }
+                        function updateThemeIcons(theme) {
+                            document.querySelectorAll('.themeToggleIcon').forEach(el => {
+                                el.className = theme === 'dark' ? 'themeToggleIcon fa fa-sun-o' : 'themeToggleIcon fa fa-moon-o';
+                            });
+                        }
+                        (function() {
+                            const saved = localStorage.getItem('theme') || 'light';
+                            document.documentElement.setAttribute('data-theme', saved);
+                            document.addEventListener('DOMContentLoaded', () => updateThemeIcons(saved));
+                        })();
+
+                        function updateSubFields(subId, method) {
+                            const label = document.getElementById('sub_phone_label_' + subId);
+                            const helper = document.getElementById('sub_phone_helper_' + subId);
+                            const input = document.getElementById('sub_phone_input_' + subId);
+                            ['ecocash', 'onemoney', 'visa'].forEach(m => {
+                                const card = document.getElementById('sub_card_' + m + '_' + subId);
+                                if (card) card.style.borderColor = 'var(--border-color)';
+                            });
+                            const activeCard = document.getElementById('sub_card_' + method + '_' + subId);
+                            if (activeCard) activeCard.style.borderColor = 'var(--accent)';
+
+                            if (method === 'ecocash') {
+                                if (label) label.innerText = 'EcoCash Mobile Number *';
+                                if (helper) helper.innerText = 'A USSD push prompt will be sent to your EcoCash phone to approve.';
+                                if (input) { input.placeholder = 'e.g. 0771234567'; input.required = true; }
+                            } else if (method === 'onemoney') {
+                                if (label) label.innerText = 'OneMoney Mobile Number *';
+                                if (helper) helper.innerText = 'A NetOne PIN prompt will be sent to your OneMoney phone to approve.';
+                                if (input) { input.placeholder = 'e.g. 0712345678'; input.required = true; }
+                            } else if (method === 'card') {
+                                if (label) label.innerText = 'Contact Phone for Visa/Mastercard (Optional)';
+                                if (helper) helper.innerText = 'You will securely input your card details on Pesepay checkout.';
+                                if (input) { input.placeholder = 'e.g. +263...'; input.required = false; }
+                            }
+                        }
+
+                        function updatePlanFields(planId, method) {
+                            const label = document.getElementById('plan_phone_label_' + planId);
+                            const helper = document.getElementById('plan_phone_helper_' + planId);
+                            const input = document.getElementById('plan_phone_input_' + planId);
+                            ['ecocash', 'onemoney', 'visa'].forEach(m => {
+                                const card = document.getElementById('plan_card_' + m + '_' + planId);
+                                if (card) card.style.borderColor = 'var(--border-color)';
+                            });
+                            const activeCard = document.getElementById('plan_card_' + method + '_' + planId);
+                            if (activeCard) activeCard.style.borderColor = 'var(--accent)';
+
+                            if (method === 'ecocash') {
+                                if (label) label.innerText = 'EcoCash Mobile Number *';
+                                if (helper) helper.innerText = 'A USSD push prompt will be sent to your EcoCash phone to approve.';
+                                if (input) { input.placeholder = 'e.g. 0771234567'; input.required = true; }
+                            } else if (method === 'onemoney') {
+                                if (label) label.innerText = 'OneMoney Mobile Number *';
+                                if (helper) helper.innerText = 'A NetOne PIN prompt will be sent to your OneMoney phone to approve.';
+                                if (input) { input.placeholder = 'e.g. 0712345678'; input.required = true; }
+                            } else if (method === 'card') {
+                                if (label) label.innerText = 'Contact Phone for Visa/Mastercard (Optional)';
+                                if (helper) helper.innerText = 'You will securely input your card details on Pesepay checkout.';
+                                if (input) { input.placeholder = 'e.g. +263...'; input.required = false; }
+                            }
+                        }
+                    </script>
+                </body>
+            </html>
         </template>
     </data>
 </odoo>

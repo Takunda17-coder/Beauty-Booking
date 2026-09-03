@@ -54,6 +54,7 @@
                         type="object"
                         class="oe_highlight"
                         attrs="{'invisible': [('payment_status', '==', 'paid')]}"
+                        confirm="Are you sure you want to initiate a Pesepay payment for this booking?"
                     />
 
                     <button

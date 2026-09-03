@@ -409,9 +409,101 @@
                                         <span class="badge rounded-pill px-2 py-1" style="background:#4338ca; color:#fff;"><i class="fa fa-credit-card me-1"/>Visa / Mastercard</span>
                                     </div>
 
-                                    <a t-att-href="'/beauty/payment/pay/' + str(new_booking.id)" class="btn btn-submit-main w-100 py-3 text-center text-white" style="text-decoration:none;">
+                                    <!-- Modal Trigger Button -->
+                                    <button type="button" class="btn btn-submit-main w-100 py-3 text-center text-white border-0 shadow-sm" data-bs-toggle="modal" data-bs-target="#pesepayConfirmModal">
                                         <i class="fa fa-lock me-2"/> Pay $<t t-esc="'{:.2f}'.format(new_booking.price)"/> with Pesepay
-                                    </a>
+                                    </button>
+
+                                    <!-- Pesepay Confirmation & Details Modal Dialog -->
+                                    <div class="modal fade text-start" id="pesepayConfirmModal" tabindex="-1" aria-labelledby="pesepayModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 rounded-4 shadow-lg" style="background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color) !important;">
+                                                <div class="modal-header border-bottom px-4 pt-4 pb-3" style="border-color: var(--border-color) !important;">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div style="width:36px; height:36px; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color:#fff; border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                                                            <i class="fa fa-shield"/>
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="modal-title fw-bold mb-0" id="pesepayModalLabel" style="color: var(--text-main);">Confirm Payment Details</h5>
+                                                            <div class="small" style="color: var(--text-muted); font-size: 0.78rem;">Pesepay Secure Sandbox Checkout</div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form method="post" t-att-action="'/beauty/payment/pay/' + str(new_booking.id)">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <div class="modal-body p-4">
+                                                        <!-- Order Confirmation Alert -->
+                                                        <div class="alert rounded-3 mb-3 p-3" style="background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main);">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <div class="small fw-bold text-uppercase" style="color: var(--accent); font-size: 0.72rem; letter-spacing: 0.05em;">Service Booking</div>
+                                                                    <div class="fw-bold" style="color: var(--text-main);"><t t-esc="new_booking.service_id.name"/></div>
+                                                                    <div class="small" style="color: var(--text-muted);">With <t t-esc="professional.name"/></div>
+                                                                </div>
+                                                                <div class="fs-4 fw-bolder text-success">
+                                                                    $<t t-esc="'{:.2f}'.format(new_booking.price)"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="small mt-2 pt-2 border-top" style="border-color: var(--border-color) !important; color: var(--text-muted);">
+                                                                <i class="fa fa-info-circle me-1 text-primary"/> Please select your method and confirm your details below to prevent accidental charges.
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Payment Method Selector -->
+                                                        <label class="form-label small fw-bold text-uppercase" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.05em;">Select Payment Method</label>
+                                                        <div class="row g-2 mb-3">
+                                                            <div class="col-4">
+                                                                <label class="payment-method-card text-center p-2 rounded-3 w-100 d-block border" id="card_ecocash" style="cursor: pointer; background: var(--input-bg); border-color: var(--accent) !important;">
+                                                                    <input type="radio" name="payment_method" value="ecocash" checked="checked" class="d-none" onchange="updateBookingPaymentFields('ecocash')"/>
+                                                                    <i class="fa fa-mobile d-block fs-3 mb-1" style="color: #0284c7;"/>
+                                                                    <span class="small fw-bold d-block" style="font-size: 0.8rem; color: var(--text-main);">EcoCash</span>
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <label class="payment-method-card text-center p-2 rounded-3 w-100 d-block border" id="card_onemoney" style="cursor: pointer; background: var(--input-bg); border-color: var(--border-color);">
+                                                                    <input type="radio" name="payment_method" value="onemoney" class="d-none" onchange="updateBookingPaymentFields('onemoney')"/>
+                                                                    <i class="fa fa-mobile d-block fs-3 mb-1" style="color: #ea580c;"/>
+                                                                    <span class="small fw-bold d-block" style="font-size: 0.8rem; color: var(--text-main);">OneMoney</span>
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <label class="payment-method-card text-center p-2 rounded-3 w-100 d-block border" id="card_visa" style="cursor: pointer; background: var(--input-bg); border-color: var(--border-color);">
+                                                                    <input type="radio" name="payment_method" value="card" class="d-none" onchange="updateBookingPaymentFields('card')"/>
+                                                                    <i class="fa fa-credit-card d-block fs-4 mb-1 mt-1" style="color: #4338ca;"/>
+                                                                    <span class="small fw-bold d-block" style="font-size: 0.8rem; color: var(--text-main);">Visa / Card</span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Dynamic Account / Phone Details -->
+                                                        <div class="mb-3" id="bookingPhoneGroup">
+                                                            <label class="form-label small fw-semibold" id="bookingPhoneLabel" style="color: var(--text-main);">EcoCash Mobile Number *</label>
+                                                            <input type="tel" name="payer_phone" id="bookingPhoneInput" class="form-control" t-att-value="new_booking.customer_phone or post.get('customer_phone', '')" placeholder="e.g. 0771234567" required="required" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);"/>
+                                                            <div class="form-text small" id="bookingPhoneHelper" style="color: var(--text-muted);">A USSD push prompt will be sent to your EcoCash mobile to approve $<t t-esc="'{:.2f}'.format(new_booking.price)"/>.</div>
+                                                        </div>
+
+                                                        <div class="row g-2 mb-2">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label small fw-semibold" style="color: var(--text-main);">Payer Full Name</label>
+                                                                <input type="text" name="payer_name" class="form-control" t-att-value="new_booking.customer_name or post.get('customer_name', '')" placeholder="Your Full Name" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label small fw-semibold" style="color: var(--text-main);">Receipt Email</label>
+                                                                <input type="email" name="payer_email" class="form-control" t-att-value="new_booking.customer_email or post.get('customer_email', '')" placeholder="name@example.com" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-top px-4 py-3" style="border-color: var(--border-color) !important;">
+                                                        <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                                            <i class="fa fa-lock me-1"/> Confirm &amp; Pay $<t t-esc="'{:.2f}'.format(new_booking.price)"/>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </t>
 
@@ -555,8 +647,40 @@
                             const btn = card.querySelector('.btn-select-action');
                             if (btn) btn.innerHTML = '<i class="fa fa-check me-1"></i> Selected';
                         }
+                    function updateBookingPaymentFields(method) {
+                        const label = document.getElementById('bookingPhoneLabel');
+                        const helper = document.getElementById('bookingPhoneHelper');
+                        const input = document.getElementById('bookingPhoneInput');
+                        const group = document.getElementById('bookingPhoneGroup');
+                        
+                        document.querySelectorAll('.payment-method-card').forEach(c => {
+                            c.style.borderColor = 'var(--border-color)';
+                        });
+
+                        const activeCard = document.getElementById('card_' + method);
+                        if (activeCard) {
+                            activeCard.style.borderColor = 'var(--accent)';
+                        }
+
+                        if (method === 'ecocash') {
+                            if (group) group.style.display = 'block';
+                            if (label) label.innerText = 'EcoCash Mobile Number *';
+                            if (helper) helper.innerText = 'A USSD push prompt will be sent to your EcoCash phone to approve.';
+                            if (input) { input.placeholder = 'e.g. 0771234567'; input.required = true; }
+                        } else if (method === 'onemoney') {
+                            if (group) group.style.display = 'block';
+                            if (label) label.innerText = 'OneMoney Mobile Number *';
+                            if (helper) helper.innerText = 'A NetOne PIN prompt will be sent to your OneMoney phone to approve.';
+                            if (input) { input.placeholder = 'e.g. 0712345678'; input.required = true; }
+                        } else if (method === 'card') {
+                            if (group) group.style.display = 'block';
+                            if (label) label.innerText = 'Contact Phone for Visa/Mastercard (Optional)';
+                            if (helper) helper.innerText = 'You will securely input your card number, expiry, and CVV on Pesepay checkout.';
+                            if (input) { input.placeholder = 'e.g. +263...'; input.required = false; }
+                        }
                     }
                 </script>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
             </body>
         </html>
     </template>
@@ -763,6 +887,7 @@
                         </t>
                     </div>
                 </main>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
             </body>
         </html>
     </template>

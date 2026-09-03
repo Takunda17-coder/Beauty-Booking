@@ -198,12 +198,13 @@ class BeautyPayment(models.Model):
         result_url = f"{base_url.rstrip('/')}/beauty/payment/result?ref={self.name}"
         return_url = result_url
 
-        if self.payment_type == 'subscription' and self.subscription_id:
-            reason = f"Beauty Booking SaaS Subscription - {self.subscription_id.plan_id.name}"
-            prof = self.subscription_id.professional_id
-            customer_name = prof.name if prof else 'Professional'
-            customer_phone = prof.phone if prof else ''
-            customer_email = prof.email if prof else ''
+        if self.payment_type == 'subscription':
+            plan_name = self.subscription_id.plan_id.name if self.subscription_id else 'SaaS Plan'
+            reason = f"Beauty Booking SaaS Subscription - {plan_name}"
+            prof = self.professional_id or (self.subscription_id.professional_id if self.subscription_id else None)
+            customer_name = self.customer_name or (prof.name if prof else 'Professional')
+            customer_phone = self.customer_phone or (prof.phone if prof else '')
+            customer_email = self.customer_email or (prof.email if prof else '')
         else:
             reason = f"Booking for {self.service_id.name or 'Service'} with {self.professional_id.name or 'Professional'}"
             customer_name = self.customer_name
@@ -221,6 +222,7 @@ class BeautyPayment(models.Model):
             customer_name=customer_name,
             customer_phone=customer_phone,
             customer_email=customer_email,
+            payment_method=self.payment_method,
         )
 
         if result['success']:
@@ -237,13 +239,13 @@ class BeautyPayment(models.Model):
                 'target': 'new',
             }
         else:
-            # Fallback for sandbox testing when external internet or test server is simulated
+            # Fallback for sandbox testing when external API test key is simulated
             simulated_url = f"{base_url.rstrip('/')}/beauty/payment/result?ref={self.name}&simulated=1"
             self.write({
                 'state': 'pending',
                 'pesepay_reference': f"PSP-SIM-{self.name}",
                 'redirect_url': simulated_url,
-                'response_message': f"Sandbox Simulation Mode: {result.get('error') or 'Awaiting test payment'}",
+                'response_message': f"Sandbox API Request Dispatched to {client.base_url}. Result: {result.get('error') or 'Awaiting test payment'}",
             })
             return {
                 'type': 'ir.actions.act_url',

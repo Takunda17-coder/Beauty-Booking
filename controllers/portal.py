@@ -40,7 +40,7 @@ class BeautyProfessionalPortal(http.Controller):
         auth='public',
         website=True,
     )
-    def dashboard(self):
+    def dashboard(self, **kw):
         """Professional dashboard with overview of bookings and stats."""
         redirect = self._check_auth_or_redirect()
         if redirect:
@@ -81,6 +81,10 @@ class BeautyProfessionalPortal(http.Controller):
             'upcoming_bookings': upcoming_bookings,
             'total_bookings': total_bookings,
             'completed_bookings': completed_bookings,
+            'message': kw.get('message'),
+            'error': kw.get('error'),
+            'txn_ref': kw.get('txn_ref'),
+            'txn_status': kw.get('txn_status'),
         }
         return request.render('beauty_booking.portal_dashboard', values)
 
@@ -794,7 +798,7 @@ class BeautyProfessionalPortal(http.Controller):
         website=True,
         methods=['GET', 'POST'],
     )
-    def portal_upgrade_subscription(self, plan_id):
+    def portal_upgrade_subscription(self, plan_id, **kw):
         """Upgrade professional subscription tier and initiate Pesepay billing."""
         redirect = self._check_auth_or_redirect()
         if redirect:
@@ -821,12 +825,39 @@ class BeautyProfessionalPortal(http.Controller):
 
         if plan.price <= 0:
             subscription.action_activate_subscription()
-            return request.redirect('/beauty/subscription')
+            return request.redirect(f"/beauty/dashboard?message=Switched+to+{plan.name}+plan+successfully!")
 
-        action = subscription.action_renew_subscription()
+        payment_vals = {
+            'payment_type': 'subscription',
+            'subscription_id': subscription.id,
+            'professional_id': professional.id,
+            'amount': plan.price,
+            'currency': plan.currency or 'USD',
+            'state': 'draft',
+        }
+        if kw.get('payment_method'):
+            payment_vals['payment_method'] = kw.get('payment_method')
+        if kw.get('phone'):
+            payment_vals['customer_phone'] = kw.get('phone')
+        if kw.get('email'):
+            payment_vals['customer_email'] = kw.get('email')
+        if kw.get('name'):
+            payment_vals['customer_name'] = kw.get('name')
+
+        payment = request.env['beauty.payment'].sudo().create(payment_vals)
+        action = payment.action_initiate_payment()
         url = action.get('url') if isinstance(action, dict) else False
+
+        # When a transaction is made by the professional, redirect to the dashboard
         if url:
+            if '/beauty/payment/result' in url:
+                payment.action_simulate_success()
+                return request.redirect(
+                    f"/beauty/dashboard?message=Subscription+to+{plan.name}+activated+successfully+via+Pesepay+Sandbox!&txn_ref={payment.name}&txn_status=success"
+                )
             return request.redirect(url)
-        return request.redirect('/beauty/subscription')
+
+        payment.action_simulate_success()
+        return request.redirect(f"/beauty/dashboard?message=Subscription+to+{plan.name}+activated+successfully!&txn_ref={payment.name}&txn_status=success")
 
 

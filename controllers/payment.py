@@ -30,13 +30,26 @@ class BeautyPaymentController(http.Controller):
 
         # Find existing pending payment or create new
         payment = booking.payment_ids.filtered(lambda p: p.state in ('draft', 'pending'))[:1]
+        
+        vals = {
+            'amount': booking.price,
+            'currency': 'USD',
+            'state': 'draft',
+        }
+        if kw.get('payment_method'):
+            vals['payment_method'] = kw.get('payment_method')
+        if kw.get('payer_phone'):
+            vals['customer_phone'] = kw.get('payer_phone')
+        if kw.get('payer_email'):
+            vals['customer_email'] = kw.get('payer_email')
+        if kw.get('payer_name'):
+            vals['customer_name'] = kw.get('payer_name')
+
         if not payment:
-            payment = request.env['beauty.payment'].sudo().create({
-                'booking_id': booking.id,
-                'amount': booking.price,
-                'currency': 'USD',
-                'state': 'draft',
-            })
+            vals['booking_id'] = booking.id
+            payment = request.env['beauty.payment'].sudo().create(vals)
+        else:
+            payment.sudo().write(vals)
 
         action = payment.sudo().action_initiate_payment()
         redirect_url = action.get('url') if isinstance(action, dict) else payment.redirect_url
@@ -81,6 +94,18 @@ class BeautyPaymentController(http.Controller):
                 payment.action_check_status()
             except Exception as e:
                 _logger.warning("Error checking status during result callback: %s", str(e))
+
+        # When a transaction is made by the professional, redirect to the dashboard
+        if payment.payment_type == 'subscription':
+            if simulated and payment.state != 'paid':
+                payment.action_mark_paid()
+            plan_name = payment.subscription_id.plan_id.name if payment.subscription_id and payment.subscription_id.plan_id else 'Membership'
+            if payment.state == 'paid':
+                msg = f"Subscription to {plan_name} has been successfully activated and paid via Pesepay Sandbox!"
+            else:
+                msg = f"Subscription transaction initiated with Pesepay (Status: {payment.state.title()})."
+            status = 'success' if payment.state == 'paid' else 'pending'
+            return request.redirect(f"/beauty/dashboard?message={msg}&txn_ref={payment.name}&txn_status={status}")
 
         values = {
             'payment': payment,
